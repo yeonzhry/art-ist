@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_USER=admin
+      - DB_PASSWORD=Zmt7rwtt64
+      - DB_HOST=database-1.cv42kwy26xf8.ap-northeast-2.rds.amazonaws.com
+      - DB_NAME=fastapi-ca
+    volumes:
+      # 개발 시에만 사용 (프로덕션에서는 제거)
+      # - ./Back:/app
+      # - ./Front/build:/app/../Front/build
+      - ./Back/keras_model.h5:/app/keras_model.h5
+    restart: unless-stopped
+
+

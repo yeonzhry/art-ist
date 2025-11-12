@@ -1,0 +1,165 @@
+.main-html, .main-page {
+    height: 100%;
+    margin: 0;
+    background-color: #f8f8f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .background-overlay {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #e9efda;
+    z-index: 1;
+    transition: height 1.5s ease-in-out;
+  }
+  
+  .background-overlay.shrink {
+    height: 15vh;
+  }
+  
+  .container {
+    text-align: center;
+    z-index: 2;
+    position: relative;
+    transition: transform 1.5s ease-in-out;
+  }
+  
+  .container.move-down {
+    transform: translateY(36vh);
+  }
+  
+  .onboarding-line {
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    transition: gap 2s ease;
+  }
+  
+  .side-img {
+    width: 420px;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  
+  .bracket-img {
+    width: 50px;
+    z-index: 20;
+    transition: transform 2s ease;
+  }
+  
+  .center-img {
+    width: 80%;
+    height: auto;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 2s ease;
+    margin-top: -5rem;
+  }
+  
+  .center-img-container {
+    position: relative;
+    width: 200px;
+    height: 300px;
+    overflow: visible;
+  }
+  
+  /* .center-img {
+    height: 300px;
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 1s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+  } */
+  
+  .center-img.original {
+    z-index: 2;
+  }
+  
+  .center-img.new {
+    z-index: 1;
+    width: 150px;
+    height: auto;
+    display: block;
+
+  }
+  
+  .new-img-container {
+    position: absolute;
+    top: 30%;
+    left: 62%;
+    transform: translateX(-50%);
+    opacity: 0;
+    width: 200px;
+    height: 200px;
+    transition: all 1.5s ease;
+    z-index: 50;
+  }
+  
+  .new-img-container.show {
+    opacity: 1;
+  }
+  
+  .new-img-container.show .center-img.new {
+    opacity: 1;
+    z-index: 100;
+  }
+
+  .extra-img {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  
+  .extra-img.show {
+    opacity: 1;
+  }
+  
+  /* 이미지 1 위치 & 크기 */
+  .img-one {
+    top: 9%;   /* container 기준 */
+    left: 29.7%;
+    width: 6%;
+    z-index: 20;
+  }
+  
+  /* 이미지 2 위치 & 크기 */
+  .img-two {
+    bottom: 25.5%; /* container 기준 */
+    right: 32%;
+    width: 35%;
+  }
+
+
+  /* .page-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: #f8f8f8;
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    border-bottom: 1px solid #ddd;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+  }
+   */
+  .main-page.final-state .page-header {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  

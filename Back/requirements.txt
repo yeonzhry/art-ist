@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+tensorflow
+python-multipart
+numpy<2
+Pillow
+opencv-python
+cvzone
+mysql-connector-python
+aiofiles

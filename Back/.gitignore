@@ -1,0 +1,10 @@
+# Python venv
+venv/
+Back/venv/
+Back/scg-backend/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dylib
