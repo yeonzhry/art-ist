@@ -1,7 +1,7 @@
-0 Do
-1 Re
-2 Mi
-3 Fa
-4 Sol
-5 La
-6 Ti
+0 Re
+1 Mi
+2 Fa
+3 Sol
+4 La
+5 Ti
+6 Do

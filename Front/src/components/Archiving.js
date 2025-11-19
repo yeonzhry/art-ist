@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabase";
+
+const hoverSound = new Audio("/sounds/hover.mp3");
+const clickSound = new Audio("/sounds/click.mp3");
+
+
 
 const fadeIn = keyframes`
   from { opacity: 0; }
@@ -97,45 +103,37 @@ const DoneOverlay = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* justify-content: center; */
   animation: ${fadeIn} 1s ease forwards;
   z-index: 30000;
 `;
 
 const NotesContainer = styled.div`
-  position: absolute;
-  top: 15rem;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
+  position: absolute; // 화면 기준으로 절대 위치
+  top: 10%;  // 원하는 위치 조정
+  left: 0;
+  width: 100%;
+  height: 15rem;
 `;
 
 const Note = styled.img`
-  :first-child  {
-    width: 6.5rem;
-    height: auto;
-    margin-top: -15rem;
-  }
-  :nth-child(2)  {
-    width: 2.44rem;
-    height: auto;
-  }
-  :nth-child(3)  {
-    width: 9rem;
-    height: auto;
-  }
+  position: absolute;
+  top: 30%;
+  left: 30%;
 `;
 
 const DoneTitle = styled.h1`
   position: absolute;
-  top: 20%;
+  top: 28%;
   font-family: "Zen Dots", sans-serif;
   font-size: 6rem;
-  color: #76b8c9;
+  color: var(--blue-04);
   margin-bottom: 1rem;
 `;
 
 const DoneText = styled.p`
+  position: absolute;
+  top: 48%; 
   font-family: "timeline-210", sans-serif;
   font-size: 1.2rem;
   color: #bfbfbf;
@@ -149,6 +147,8 @@ const ArchiveLink = styled.span`
 `;
 
 const HomeButton = styled.div`
+  position: absolute;
+  top: 58%; 
   font-family: "timeline-210", sans-serif;
   font-size: 1.3rem;
   color: var(--background-2);
@@ -161,21 +161,76 @@ const HomeButton = styled.div`
   }
 `;
 
-const Archiving = ({ onClose, onNext }) => {
+const Archiving = ({ onClose, onNext, userId }) => {
   const [showDone, setShowDone] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
 
-  const handleLPClick = () => {
-    setShowDone(true);
+  // LP 색상 매핑
+  const LP_COLORS = {
+    1: 'blue',
+    2: 'red',
+    3: 'green'
+  };
+
+  const handleLPClick = async (lpNumber) => {
+    if (!userId) {
+      console.error("User ID is missing");
+      alert("User ID가 없습니다.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+
+      const { data: recordings, error: fetchError } = await supabase
+        .from("Recording")
+        .select("id")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      if (!recordings || recordings.length === 0) {
+        throw new Error("해당 사용자의 녹음 기록을 찾을 수 없습니다.");
+      }
+
+      const recordingId = recordings[0].id;
+      const lpColor = LP_COLORS[lpNumber];
+
+      console.log(`Saving LP color: ${lpColor} for recording ID: ${recordingId}`);
+
+      // 2. Recording 테이블에 LP 색상 저장
+      // file_url 컬럼에 LP 색상 저장 (또는 새로운 컬럼이 있다면 그것 사용)
+      const { error: updateError } = await supabase
+        .from("Recording")
+        .update({ lp_color: lpColor })
+        .eq("id", recordingId);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      console.log("✅ LP color saved successfully:", lpColor);
+      
+      // 성공하면 Done 화면으로 전환
+      setShowDone(true);
+    } catch (error) {
+      console.error("❌ Error saving LP color:", error);
+      alert(`LP 색상 저장 중 오류가 발생했습니다: ${error.message}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (showDone) {
     return (
       <DoneOverlay>
         <NotesContainer>
-          <Note src="/images/note1.svg" alt="note1" />
-          <Note src="/images/note2.svg" alt="note2" />
-          <Note src="/images/note3.svg" alt="note3" />
+          <Note src="/images/note.svg" alt="note" />
         </NotesContainer>
 
         <DoneTitle>All done!</DoneTitle>
@@ -196,18 +251,51 @@ const Archiving = ({ onClose, onNext }) => {
       <Label>( Archiving )</Label>
 
       <LPContainer>
-        <LPWrapper onClick={() => handleLPClick(1)}>
+        <LPWrapper
+          onMouseEnter={() => {
+            hoverSound.currentTime = 0;
+            hoverSound.play();
+          }}
+          onClick={() => {
+            clickSound.currentTime = 0;
+            clickSound.play();
+            handleLPClick(1);
+          }}
+                >
           <LPImage src="/images/LP_Blue.svg" alt="LP 1" />
         </LPWrapper>
-        <LPWrapper onClick={() => handleLPClick(2)}>
+
+        <LPWrapper
+          onMouseEnter={() => {
+            hoverSound.currentTime = 0;
+            hoverSound.play();
+          }}
+          onClick={() => {
+            clickSound.currentTime = 0;
+            clickSound.play();
+            handleLPClick(2);
+          }}
+                >
           <LPImage src="/images/LP_Red.svg" alt="LP 2" />
         </LPWrapper>
-        <LPWrapper onClick={() => handleLPClick(3)}>
+        <LPWrapper
+          onMouseEnter={() => {
+            hoverSound.currentTime = 0;
+            hoverSound.play();
+          }}
+          onClick={() => {
+            clickSound.currentTime = 0;
+            clickSound.play();
+            handleLPClick(3);
+          }}
+                >
           <LPImage src="/images/LP_Green.svg" alt="LP 3" />
         </LPWrapper>
       </LPContainer>
 
-      <Notice>Select Your LP Color</Notice>
+      <Notice>
+        {isSaving ? "Saving..." : "Select Your LP Color"}
+      </Notice>
 
       <ButtonBg src="/images/buttonBg.svg" alt="Button bg" />
 
@@ -216,7 +304,12 @@ const Archiving = ({ onClose, onNext }) => {
           src="/images/button1.svg"
           alt="Prev"
           onClick={onClose}
-          style={{ cursor: "pointer", width: "1.87rem", height: "auto" }}
+          style={{ 
+            cursor: isSaving ? "not-allowed" : "pointer", 
+            width: "1.87rem", 
+            height: "auto",
+            opacity: isSaving ? 0.5 : 1
+          }}
         />
         <img
           src="/images/button2.svg"
@@ -227,7 +320,12 @@ const Archiving = ({ onClose, onNext }) => {
           src="/images/button3.svg"
           alt="Next"
           onClick={onNext}
-          style={{ cursor: "pointer", width: "1.87rem", height: "auto" }}
+          style={{ 
+            cursor: isSaving ? "not-allowed" : "pointer", 
+            width: "1.87rem", 
+            height: "auto",
+            opacity: isSaving ? 0.5 : 1
+          }}
         />
       </ButtonContainer>
     </Overlay>

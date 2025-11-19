@@ -4,6 +4,9 @@ import styled, { createGlobalStyle } from 'styled-components';
 
 
 const GlobalStyle = createGlobalStyle`
+    html {
+        scroll-behavior: smooth;
+    }
    
     body {
         background-color: #f8f8f8; 
@@ -20,7 +23,27 @@ const HowToContainer = styled.div`
     font-family: "timeline-210", sans-serif;
     color: #121212;
     margin-bottom: 10rem;
-  
+    scroll-behavior: smooth;
+
+    @media (min-width: 1920px) and (max-width: 2560px) {
+        max-width: 80rem;
+        padding-top: clamp(80px, 5vh, 100px);
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+
+    @media (min-width: 2560px) {
+        max-width: 90rem;
+        padding-top: clamp(90px, 5.5vh, 120px);
+        padding-left: 3rem;
+        padding-right: 3rem;
+    }
+
+    @media (max-width: 1400px) {
+        max-width: 100%;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
 `;
 
 const HowToContent = styled.main`
@@ -34,27 +57,64 @@ const Title = styled.h1`
     font-family: "Zen Dots", sans-serif;
     font-weight: 400;
 
+    @media (min-width: 1920px) and (max-width: 2560px) {
+        font-size: clamp(2.5rem, 2.5vw, 3.5rem);
+        margin-bottom: clamp(50px, 4vh, 70px);
+    }
+
+    @media (min-width: 2560px) {
+        font-size: clamp(3rem, 3vw, 4rem);
+        margin-bottom: clamp(60px, 5vh, 80px);
+    }
+
+    @media (max-width: 1400px) {
+        font-size: 2.5rem;
+        margin-bottom: 40px;
+    }
 `;
 
 const StepSection = styled.section`
     display: grid;
-
     grid-template-columns: 1fr 6fr 1.5fr;
     gap: 20px;
     align-items: start;
     margin-bottom: 50px;
     padding: 30px 0;
 
- 
-    &.triptych {
-      
-        grid-template-columns: 1.5fr 10fr 1px 1.2fr;
-        align-items: start;
+    @media (min-width: 1920px) and (max-width: 2560px) {
+        gap: clamp(20px, 2vw, 30px);
+        margin-bottom: clamp(45px, 4vh, 60px);
+        padding: clamp(25px, 2.5vh, 40px) 0;
     }
 
-  
+    @media (min-width: 2560px) {
+        gap: clamp(25px, 2.5vw, 35px);
+        margin-bottom: clamp(50px, 5vh, 70px);
+        padding: clamp(30px, 3vh, 50px) 0;
+    }
+
+    @media (max-width: 1400px) {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 40px;
+        padding: 20px 0;
+    }
+ 
+    &.triptych {
+        grid-template-columns: 1.5fr 10fr 1px 1.2fr;
+        align-items: start;
+
+        @media (max-width: 1400px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
     &.withLeftDivider {
         grid-template-columns: 1px 1fr 2fr 1.5fr;
+
+        @media (max-width: 1400px) {
+            grid-template-columns: 1fr;
+        }
     }
 `;
 
@@ -88,15 +148,51 @@ const StepTitle = styled.h2`
     font-weight: bold;
     margin-top: 0;
     width: 15rem;
-  
+
+    @media (min-width: 1920px) and (max-width: 2560px) {
+        font-size: clamp(1.8rem, 2vw, 2.5rem);
+        width: clamp(14rem, 14vw, 18rem);
+    }
+
+    @media (min-width: 2560px) {
+        font-size: clamp(2rem, 2.2vw, 2.8rem);
+        width: clamp(15rem, 15vw, 20rem);
+    }
+
+    @media (max-width: 1400px) {
+        width: 100%;
+        font-size: 1.8rem;
+    }
 `;
 
 const StepDetails = styled.div`
   line-height: 1.5;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+        font-size: clamp(1rem, 1.1vw, 1.2rem);
+        line-height: clamp(1.4, 1.6vw, 1.8);
+    }
+
+    @media (min-width: 2560px) {
+        font-size: clamp(1.1rem, 1.2vw, 1.3rem);
+        line-height: clamp(1.5, 1.7vw, 1.9);
+    }
 `;
 
 const TriptychDetails = styled(StepDetails)`
-  padding-left: 10rem; 
+  padding-left: 10rem;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+        padding-left: clamp(8rem, 8vw, 12rem);
+    }
+
+    @media (min-width: 2560px) {
+        padding-left: clamp(10rem, 10vw, 14rem);
+    }
+
+    @media (max-width: 1400px) {
+        padding-left: 0;
+    }
 `;
 
 const DetailItem = styled.div`

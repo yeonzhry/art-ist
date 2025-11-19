@@ -68,11 +68,47 @@ const InstrumentModel = () => {
   const [selectedModel, setSelectedModel] = useState("piano");
   const navigate = useNavigate();
 
-  const handlePrev = () =>
-    setSelectedModel((prev) => (prev === "piano" ? "guitar" : "piano"));
+  const clickSoundRef = useRef(null);
+
+  // 오디오 미리 로드
+  if (!clickSoundRef.current) {
+    clickSoundRef.current = new Audio("/sounds/next.mp3"); // 원하는 효과음 파일 경로
+    clickSoundRef.current.volume = 0.6;
+  }
+
+
+  const handlePrev = () => {
+    const audio = clickSoundRef.current;
+    if (!audio) return;
   
-  const handleNext = () =>
-    setSelectedModel((prev) => (prev === "piano" ? "guitar" : "piano"));
+    audio.currentTime = 0;   // 처음부터
+    audio.play();
+  
+    // 0.2초 뒤 자동 정지
+    setTimeout(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }, 500); // 200ms = 0.2초
+    
+    setSelectedModel(prev => prev === "piano" ? "guitar" : "piano");
+  };
+  
+  const handleNext = () => {
+    const audio = clickSoundRef.current;
+    if (!audio) return;
+  
+    audio.currentTime = 0;   // 처음부터
+    audio.play();
+  
+    // 0.2초 뒤 자동 정지
+    setTimeout(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }, 500); // 200ms = 0.2초
+    
+    setSelectedModel(prev => prev === "piano" ? "guitar" : "piano");
+  };
+  
   
 
   const handleModelClick = () => {

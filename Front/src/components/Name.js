@@ -4,6 +4,8 @@ import ReactDOM from "react-dom";
 import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import * as Tone from "tone";
+import { supabase } from "../supabase"; // ✅ Supabase 연동
+import PlayControlButtons from "./PlayControlButtons";
 
 // ========================
 // Styled Components
@@ -142,26 +144,6 @@ const ColorButton = styled.img`
   padding: 0.1rem;
 `;
 
-const ButtonBg = styled.img`
-  width: 20rem;
-  height: auto;
-  z-index: 0;
-  position: fixed;
-  left: 50%;
-  bottom: 6rem;
-  transform: translateX(-50%);
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 3rem;
-  position: fixed;
-  left: 50%;
-  bottom: 6.5rem;
-  transform: translateX(-50%);
-  z-index: 1;
-`;
-
 const StatusMessage = styled.div`
   margin-top: 1rem;
   color: var(--neutral-04);
@@ -177,7 +159,6 @@ const Name = ({ onNext }) => {
   const [selectedColor, setSelectedColor] = useState("pink");
   const [synth, setSynth] = useState(null);
   const [status, setStatus] = useState("");
-  const [userId, setUserId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -242,39 +223,51 @@ const Name = ({ onNext }) => {
   const handlePrev = () => navigate("/main");
 
   // ========================
-  // FastAPI POST 요청
+  // Supabase Insert
   // ========================
   const handleNext = async () => {
     if (!name) return;
 
-    const API_BASE_URL = "http://127.0.0.1:8000";
-    const requestBody = { name };
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/users`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-
-      const data = await response.json();
-
-      if (response.status === 200 || response.status === 201) {
-        setStatus(`생성 완료! ID: ${data.user_id}, Name: ${data.name}`);
-      } else {
-        setStatus(data.detail || "오류");
-      }
-    } catch (error) {
-      setStatus("네트워크 오류");
-      console.error("네트워크 오류:", error);
+    // 🎸 Main.js에서 선택된 instrument 불러오기
+    const instrument = localStorage.getItem("instrument");
+    if (!instrument) {
+      setStatus("악기 정보가 없습니다. 메인 화면에서 다시 선택해주세요.");
+      return;
     }
 
-    if (onNext) onNext();
-};
+    try {
+      // ✅ Supabase에 name + instrument + color + positions 함께 저장
+      const { data, error } = await supabase
+        .from("User")
+        .insert([{ 
+          name, 
+          instrument,
+          name_color: selectedColor,
+          name_positions: randomPositions
+        }])
+        .select();
 
+      if (error) {
+        console.error("Supabase Error:", error);
+        setStatus(`DB 오류: ${error.message}`);
+        return;
+      }
+
+      const user = data[0];
+      setStatus(`생성 완료! ID: ${user.id}, Name: ${user.name}, Instrument: ${user.instrument}`);
+
+      // ✅ user_id를 localStorage에 저장
+      localStorage.setItem("user_id", user.id);
+
+      if (onNext) onNext();
+    } catch (err) {
+      console.error("네트워크 오류:", err);
+      setStatus("네트워크 오류");
+    }
+  };
 
   // ========================
-  // Render JSX
+  // Render
   // ========================
   const nameContent = (
     <Overlay>
@@ -320,13 +313,28 @@ const Name = ({ onNext }) => {
 
       <StatusMessage>{status}</StatusMessage>
 
-      <ButtonBg src="/images/buttonBg.svg" alt="Button bg" />
-      <ButtonContainer>
-        <img src="/images/button1.svg" alt="Prev" onClick={handlePrev} style={{ cursor: "pointer", width: "1.87rem" }} />
-        <img src="/images/button2.svg" alt="Next" onClick={handleNext} style={{ cursor: "pointer", width: "4rem" }} />
-        <img src="/images/button3.svg" alt="Next" onClick={handleNext} style={{ cursor: "pointer", width: "1.87rem" }} />
-      </ButtonContainer>
-
+      <PlayControlButtons
+        buttons={[
+          {
+            src: "/images/button1.svg",
+            alt: "Prev",
+            width: "1.87rem",
+            onClick: handlePrev,
+          },
+          {
+            src: "/images/button2.svg",
+            alt: "Next",
+            width: "4rem",
+            onClick: handleNext,
+          },
+          {
+            src: "/images/button3.svg",
+            alt: "Next",
+            width: "1.87rem",
+            onClick: handleNext,
+          },
+        ]}
+      />
       <HiddenInput
         id="hidden-input"
         type="text"

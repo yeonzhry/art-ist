@@ -2,6 +2,8 @@ import React, { useRef, useCallback, useState, useEffect } from "react";
 import styled from "styled-components";
 import Webcam from "react-webcam";
 import * as Tone from "tone";
+import { supabase } from '../supabase';
+import PlayControlButtons from "./PlayControlButtons";
 
 const Overlay = styled.div`
   position: fixed;
@@ -56,26 +58,6 @@ const HandItem = styled.div`
   }
 `;
 
-const ButtonBg = styled.img`
-  width: 20rem;
-  height: auto;
-  z-index: 0;
-  position: fixed;
-  left: 50%;
-  bottom: 6rem;
-  transform: translateX(-50%);
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 3rem;
-  position: fixed;
-  left: 50%;
-  bottom: 6.5rem;
-  transform: translateX(-50%);
-  z-index: 1;
-`;
-
 const WebcamContainer = styled.div`
   position: absolute;
   top: 50%;
@@ -95,7 +77,6 @@ const WebcamContainer = styled.div`
   }
 `;
 
-// ⭐️ 이펙트 조절 버튼 스타일
 const EffectControlContainer = styled.div`
   display: flex;
   gap: 2.6rem;
@@ -137,12 +118,18 @@ const EffectKnob = styled.div`
 const Record = ({ onPrev, onNext, onComplete }) => {
   const webcamRef = useRef(null);
   const [prediction, setPrediction] = useState("");
+  const [userId, setUserId] = useState(null);
 
   const synthRef = useRef(null);
   const playSoundRef = useRef(() => {});
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordedNotes, setRecordedNotes] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false); // 저장 완료 플래그
+  const [savedRecordingId, setSavedRecordingId] = useState(null); // 저장된 녹음 ID
   const recordingTimerRef = useRef(null);
 
   const [reverbIntensity, setReverbIntensity] = useState(0);
@@ -150,18 +137,102 @@ const Record = ({ onPrev, onNext, onComplete }) => {
   const [chorusIntensity, setChorusIntensity] = useState(0);
   const [distortionIntensity, setDistortionIntensity] = useState(0);
 
-  // Tone.js 이펙트 Ref
   const reverbRef = useRef(null);
   const delayRef = useRef(null);
   const chorusRef = useRef(null);
   const distortionRef = useRef(null);
 
   useEffect(() => {
+    try {
+      const storedUserId = localStorage.getItem('user_id');
+      if (storedUserId) {
+        setUserId(parseInt(storedUserId));
+        console.log("User ID loaded:", storedUserId);
+      }
+      
+      // 이전에 저장된 녹음 ID 확인
+      const previousRecordingId = localStorage.getItem('current_recording_id');
+      if (previousRecordingId) {
+        console.log("이전 녹음 ID 발견:", previousRecordingId);
+        setSavedRecordingId(previousRecordingId);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user_id:", error);
+    }
+  }, []);
+  
+  // 컴포넌트 마운트 시 이전 녹음 삭제
+  useEffect(() => {
+    const deletePreviousRecording = async () => {
+      const previousRecordingId = localStorage.getItem('current_recording_id');
+      if (previousRecordingId && userId) {
+        try {
+          console.log("이전 녹음 삭제 시도:", previousRecordingId);
+          
+          // DB에서 녹음 정보 가져오기 (파일 URL 확인용)
+          const { data: recordingData, error: fetchError } = await supabase
+            .from("Recording")
+            .select("file_url, id")
+            .eq("id", previousRecordingId)
+            .eq("user_id", userId)
+            .single();
+          
+          if (fetchError) {
+            console.log("이전 녹음을 찾을 수 없음 (이미 삭제되었거나 존재하지 않음):", fetchError.message);
+          } else if (recordingData) {
+            // 스토리지에서 파일 삭제
+            if (recordingData.file_url) {
+              try {
+                const fileName = recordingData.file_url.split('/').pop();
+                if (fileName) {
+                  const { error: deleteError } = await supabase.storage
+                    .from("recordings")
+                    .remove([fileName]);
+                  
+                  if (deleteError) {
+                    console.error("파일 삭제 실패:", deleteError);
+                  } else {
+                    console.log("파일 삭제 완료:", fileName);
+                  }
+                }
+              } catch (err) {
+                console.error("파일 삭제 중 오류:", err);
+              }
+            }
+            
+            // DB에서 녹음 삭제
+            const { error: deleteError } = await supabase
+              .from("Recording")
+              .delete()
+              .eq("id", previousRecordingId)
+              .eq("user_id", userId);
+            
+            if (deleteError) {
+              console.error("DB 삭제 실패:", deleteError);
+            } else {
+              console.log("이전 녹음 삭제 완료:", previousRecordingId);
+            }
+          }
+          
+          // localStorage에서 이전 녹음 ID 제거
+          localStorage.removeItem('current_recording_id');
+          setSavedRecordingId(null);
+        } catch (err) {
+          console.error("이전 녹음 삭제 중 오류:", err);
+        }
+      }
+    };
+    
+    if (userId) {
+      deletePreviousRecording();
+    }
+  }, [userId]);
+
+  useEffect(() => {
     const initTone = async () => {
       try {
         if (Tone.context.state !== "running") {
           await Tone.start();
-          console.log("Tone.js started successfully");
         }
 
         reverbRef.current = new Tone.Reverb({ decay: 2, wet: 0 }).toDestination();
@@ -176,7 +247,6 @@ const Record = ({ onPrev, onNext, onComplete }) => {
         } catch {}
 
         if (instrument === 'guitar') {
-          // 기타: 샘플러 사용 (public/Guitar/*.wav). 실패 시 플럭신스로 폴백
           try {
             const sampler = new Tone.Sampler({
               urls: {
@@ -211,7 +281,6 @@ const Record = ({ onPrev, onNext, onComplete }) => {
             );
           }
         } else {
-          // 피아노: 기본 Synth (필요 시 샘플러로 교체 가능)
           synthRef.current = new Tone.Synth({
             oscillator: { type: "sine" },
             envelope: { attack: 0.005, decay: 0.2, sustain: 0.2, release: 1.2 }
@@ -232,8 +301,8 @@ const Record = ({ onPrev, onNext, onComplete }) => {
             Mi: "E4",
             Fa: "F4",
             Sol: "G4",
-            La: "A3",
-            Ti: "Bb3"
+            La: "A4",
+            Ti: "B4"
           };
           const note = notes[prediction];
           if (note && synthRef.current) {
@@ -247,7 +316,6 @@ const Record = ({ onPrev, onNext, onComplete }) => {
     initTone();
   }, []);
 
-  // 이펙트 강도 변화
   useEffect(() => {
     if (reverbRef.current) reverbRef.current.set({ wet: reverbIntensity / 100 });
   }, [reverbIntensity]);
@@ -284,7 +352,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
     formData.append("file", blob, "frame.jpg");
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/predict", {
+      const response = await fetch("http://127.0.0.1:8000/api/predict", {
         method: "POST",
         body: formData
       });
@@ -314,29 +382,237 @@ const Record = ({ onPrev, onNext, onComplete }) => {
     return () => clearInterval(interval);
   }, [captureAndSend, isRecording]);
 
-  // 🎵 BPM 제거 → 1.5초 간격 고정 녹음
-  const startRecording = useCallback(() => {
-    if (isRecording) return;
-    const intervalMs = 1200;
+  const startAudioRecording = async () => {
+    try {
+      const dest = Tone.getContext().createMediaStreamDestination();
+      
+      if (synthRef.current) {
+        synthRef.current.connect(dest);
+      }
+      
+      const stream = dest.stream;
+      
+      if (stream.getAudioTracks().length === 0) {
+        console.error("No audio tracks in stream");
+        return;
+      }
+
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+      
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.start(100);
+      console.log("Audio recording started");
+    } catch (error) {
+      console.error("Failed to start audio recording:", error);
+    }
+  };
+
+  const stopAudioRecording = () => {
+    return new Promise((resolve) => {
+      if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
+        resolve(null);
+        return;
+      }
+
+      mediaRecorderRef.current.onstop = () => {
+        if (audioChunksRef.current.length === 0) {
+          resolve(null);
+          return;
+        }
+
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm;codecs=opus' });
+        console.log("Audio blob created, size:", audioBlob.size, "bytes");
+        resolve(audioBlob);
+      };
+
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (error) {
+        console.error("Error stopping recorder:", error);
+        resolve(null);
+      }
+    });
+  };
+
+  const saveToSupabase = async (notes, audioBlob) => {
+    // 중복 저장 방지
+    if (isSaving || hasSaved) {
+      console.log("Already saving or saved, skipping...");
+      return;
+    }
+
+    if (!userId) {
+      alert("사용자 정보를 찾을 수 없습니다.");
+      return;
+    }
+  
+    setIsSaving(true);
+  
+    try {
+      let fileUrl = null;
+  
+      if (audioBlob && audioBlob.size > 0) {
+        console.log("Uploading audio, size:", audioBlob.size);
+  
+        const fileName = `${Date.now()}.webm`;
+  
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("recordings")
+          .upload(fileName, audioBlob, {
+            contentType: "audio/webm",
+            upsert: false
+          });
+  
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          alert("오디오 업로드 실패: " + uploadError.message);
+          setIsSaving(false);
+          return;
+        } else {
+          console.log("Upload success:", uploadData);
+  
+          const { data: urlData } = supabase.storage
+            .from("recordings")
+            .getPublicUrl(uploadData.path);
+  
+          fileUrl = urlData.publicUrl;
+          console.log("Public URL:", fileUrl);
+        }
+      }
+  
+      const instrument = localStorage.getItem("instrument") || "piano";
+  
+      const recordingData = {
+        user_id: userId,
+        notes: {
+          sequence: notes,
+          effects: {
+            reverb: reverbIntensity,
+            delay: delayIntensity,
+            chorus: chorusIntensity,
+            distortion: distortionIntensity
+          },
+          instrument: instrument
+        },
+        file_url: fileUrl
+      };
+  
+      const { data, error } = await supabase
+        .from("Recording")
+        .insert([recordingData])
+        .select();
+
+      if (error) {
+        console.error("DB insert error:", error);
+        alert("DB 저장 실패: " + error.message);
+        setIsSaving(false);
+        return;
+      } else {
+        console.log("Recording saved:", data);
+        const savedId = data[0]?.id;
+        
+        if (savedId) {
+          // 저장된 녹음 ID를 localStorage에 저장 (재녹음 시 삭제용)
+          localStorage.setItem('current_recording_id', savedId.toString());
+          setSavedRecordingId(savedId.toString());
+        }
+        
+        setHasSaved(true); // 저장 완료 표시
+        setIsSaving(false); // 저장 완료
+        console.log("✅ 녹음 저장 완료. ID:", savedId);
+        
+        // 저장이 완료된 후 자동으로 Score로 이동
+        // 사용자가 Next 버튼을 클릭할 수도 있으므로, 여기서 자동으로 이동하지 않고
+        // 사용자가 Next 버튼을 클릭하거나 자동 이동을 원하면 onComplete 호출
+        // 자동 이동을 원하지 않으면 주석 처리
+        setTimeout(() => {
+          if (onComplete && notes && notes.length > 0) {
+            onComplete(notes);
+          }
+        }, 500);
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+      alert("저장 중 오류 발생.");
+      setIsSaving(false);
+      setHasSaved(false); // 저장 실패 시 플래그 리셋
+    }
+  };
+
+  const startRecording = useCallback(async () => {
+    if (isRecording || isSaving) return;
+    
+
     setRecordedNotes([]);
     setIsRecording(true);
+    setHasSaved(false); // 녹음 시작 시 플래그 초기화
+    setIsSaving(false); // 저장 상태도 초기화
+    
+    const intervalMs = 1200;
 
+    await startAudioRecording();
+
+    // 녹음된 노트를 직접 추적하기 위한 배열
+    const notesArray = [];
+    
     let ticks = 0;
     recordingTimerRef.current = setInterval(async () => {
       try {
         const label = await captureAndSend();
-        setRecordedNotes((prev) => [...prev, label || "rest"]);
+        const note = label || "rest";
+        notesArray.push(note);
+        setRecordedNotes([...notesArray]);
       } catch (e) {
-        setRecordedNotes((prev) => [...prev, "rest"]);
+        const note = "rest";
+        notesArray.push(note);
+        setRecordedNotes([...notesArray]);
       }
       ticks += 1;
+      
       if (ticks >= 32) {
-        clearInterval(recordingTimerRef.current);
-        recordingTimerRef.current = null;
-        setIsRecording(false);
+        // 32틱일 때만 finalNotes 생성
+        if (ticks === 32) {
+          // 32개의 노트가 확실히 기록되었는지 확인
+          const finalNotes = notesArray.length === 32 
+            ? [...notesArray] 
+            : [...notesArray, ...Array(32 - notesArray.length).fill("rest")].slice(0, 32);
+          
+          // 상태 업데이트
+          setRecordedNotes(finalNotes);
+        }
+        
+        // 34틱까지 기다렸다가 녹음 중단 (마지막 음 재생 시간 확보)
+        if (ticks >= 33) {
+          clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+          setIsRecording(false);
+          
+          const audioBlob = await stopAudioRecording();
+          
+          // 32개만 저장 (혹시 모를 추가 노트 제거)
+          const finalNotes = notesArray.slice(0, 32);
+          const paddedNotes = finalNotes.length === 32 
+            ? finalNotes 
+            : [...finalNotes, ...Array(32 - finalNotes.length).fill("rest")];
+          
+          setTimeout(() => {
+            saveToSupabase(paddedNotes, audioBlob);
+          }, 300);
+        }
+        return; // 32 이후에는 더 이상 노트 추가하지 않음
       }
+    
     }, intervalMs);
-  }, [isRecording, captureAndSend]);
+  }, [isRecording, captureAndSend, userId, reverbIntensity, delayIntensity, chorusIntensity, distortionIntensity]);
 
   useEffect(() => {
     return () => {
@@ -346,7 +622,6 @@ const Record = ({ onPrev, onNext, onComplete }) => {
       }
     };
   }, []);
-
 
   return (
     <Overlay>
@@ -369,29 +644,26 @@ const Record = ({ onPrev, onNext, onComplete }) => {
       </RightHand>
 
       <WebcamContainer>
-          <Webcam
-            ref={webcamRef}
-            mirrored={true}
-            audio={false}
-            screenshotFormat="image/jpeg"
-            style={{ width: "100%", height: "100%" }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              bottom: "10px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              color: "white"
-            }}
-          >
-            {prediction && <h1>{prediction}</h1>}
-          </div>
-        </WebcamContainer>
+        <Webcam
+          ref={webcamRef}
+          mirrored={true}
+          audio={false}
+          screenshotFormat="image/jpeg"
+          style={{ width: "100%", height: "100%" }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "10px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            color: "white"
+          }}
+        >
+          {prediction && <h1>{prediction}</h1>}
+        </div>
+      </WebcamContainer>
 
-      <ButtonBg src="/images/buttonBg.svg" alt="Button bg" />
-
-      {/* 🎵 단순 녹음 상태 표시 */}
       <div
         style={{
           position: "fixed",
@@ -406,11 +678,10 @@ const Record = ({ onPrev, onNext, onComplete }) => {
         }}
       >
         <span>
-          {isRecording ? `녹음중... ${recordedNotes.length}/32` : "대기 중"}
+          {isSaving ? "저장 중..." : isRecording ? `녹음중... ${recordedNotes.length}/32` : "대기 중"}
         </span>
       </div>
 
-      {/* Left Side Effects */}
       <LeftEffects>
         <EffectKnob
           $rotation={reverbIntensity * 3.6}
@@ -429,38 +700,35 @@ const Record = ({ onPrev, onNext, onComplete }) => {
         </EffectKnob>
       </LeftEffects>
 
-      {/* 중앙 버튼 */}
-      <ButtonContainer>
-  {/* 이전 화면으로 돌아가기 */}
-  <img
-    src="/images/button1.svg"
-    alt="Prev"
-    onClick={onPrev ? onPrev : () => console.log("Prev clicked")}
-    style={{ cursor: "pointer", width: "1.87rem", height: "auto" }}
-  />
+      <PlayControlButtons
+        buttons={[
+          {
+            src: "/images/button1.svg",
+            alt: "Prev",
+            width: "1.87rem",
+            onClick: onPrev ? onPrev : () => console.log("Prev clicked"),
+          },
+          {
+            src: "/images/button2.svg",
+            alt: "Record",
+            width: "4rem",
+            onClick: startRecording,
+            disabled: isRecording || isSaving,
+          },
+          {
+            src: "/images/button3.svg",
+            alt: "Next",
+            width: "1.87rem",
+            onClick: () => {
+              if (onComplete && recordedNotes.length > 0 && !isSaving) {
+                onComplete(recordedNotes);
+              }
+            },
+            disabled: isSaving,
+          },
+        ]}
+      />
 
-  {/* 녹음 시작 */}
-  <img
-    src="/images/button2.svg"
-    alt="Record"
-    onClick={startRecording}
-    style={{ cursor: "pointer", width: "4rem", height: "auto" }}
-  />
-
-  {/* 다음 화면 (Score) */}
-  <img
-    src="/images/button3.svg"
-    alt="Next"
-    onClick={() => {
-      if (onComplete && recordedNotes.length > 0) {
-        onComplete(recordedNotes);
-      }
-    }}
-    style={{ cursor: "pointer", width: "1.87rem", height: "auto" }}
-  />
-</ButtonContainer>
-
-      {/* Right Side Effects */}
       <RightEffects>
         <EffectKnob
           $rotation={delayIntensity * 3.6}
@@ -479,7 +747,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
         </EffectKnob>
       </RightEffects>
 
-      {!isRecording && recordedNotes.length === 32 && (
+      {!isRecording && !isSaving && recordedNotes.length === 32 && (
         <div
           style={{
             position: "fixed",
@@ -491,7 +759,6 @@ const Record = ({ onPrev, onNext, onComplete }) => {
             fontSize: "0.8rem"
           }}
         >
-          <span>녹음 완료!</span>
         </div>
       )}
     </Overlay>

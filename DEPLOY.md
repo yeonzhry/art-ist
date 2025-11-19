@@ -20,7 +20,7 @@ git push -u origin main
 
 ### 2단계: Railway에 가입 및 프로젝트 연결
 
-1. **Railway 가입**: https://railway.app 접속 → "Login" → GitHub로 가입
+1. **Railway 가입**: apphttps://railway. 접속 → "Login" → GitHub로 가입
 2. **새 프로젝트 생성**: "New Project" 클릭
 3. **GitHub 레포 연결**: "Deploy from GitHub repo" 선택 → 본인의 레포지토리 선택
 4. **자동 배포**: Railway가 Dockerfile을 자동으로 감지하고 배포 시작!
@@ -141,4 +141,6 @@ Vercel에 익숙하다면 이 방법도 가능합니다.
 - ✅ 무료 티어 제공
 - ✅ 쉬운 설정
 - ✅ Vercel과 비슷한 사용자 경험
+
+
 

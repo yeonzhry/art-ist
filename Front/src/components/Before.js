@@ -1,5 +1,6 @@
 import React from "react";
 import styled, { keyframes } from "styled-components";
+import PlayControlButtons from "./PlayControlButtons";
 
 const fadeIn = keyframes`
   0% { opacity: 0; }
@@ -62,26 +63,6 @@ const Text = styled.p`
   line-height: 2rem;
 `;
 
-const ButtonBg = styled.img`
-  width: 20rem;
-  height: auto;
-  z-index: 0;
-  position: fixed;
-  left: 50%;
-  bottom: 6rem;
-  transform: translateX(-50%);
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 3rem;
-  position: fixed;
-  left: 50%;
-  bottom: 6.5rem;
-  transform: translateX(-50%);
-  z-index: 1;
-`;
-
 const Before = ({ onPrev, onNext }) => {
   return (
     <Overlay>
@@ -111,27 +92,28 @@ const Before = ({ onPrev, onNext }) => {
         </Text>
       </TextBox>
 
-      <ButtonBg src="/images/buttonBg.svg" alt="Button bg" />
-      <ButtonContainer>
-        <img
-          src="/images/button1.svg"
-          alt="Prev"
-          onClick={onPrev ? onPrev : () => console.log("Prev clicked")}
-          style={{ cursor: "pointer", width: "1.87rem", height: "auto" }}
-        />
-        <img
-          src="/images/button2.svg"
-          alt="Next"
-          onClick={onNext ? onNext : () => console.log("Next clicked")}
-          style={{ cursor: "pointer", width: "4rem", height: "auto" }}
-        />
-        <img
-          src="/images/button3.svg"
-          alt="Next"
-          onClick={onNext ? onNext : () => console.log("Next clicked")}
-          style={{ cursor: "pointer", width: "1.87rem", height: "auto" }}
-        />
-      </ButtonContainer>
+      <PlayControlButtons
+        buttons={[
+          {
+            src: "/images/button1.svg",
+            alt: "Prev",
+            width: "1.87rem",
+            onClick: onPrev ? onPrev : () => console.log("Prev clicked"),
+          },
+          {
+            src: "/images/button2.svg",
+            alt: "Next",
+            width: "4rem",
+            onClick: onNext ? onNext : () => console.log("Next clicked"),
+          },
+          {
+            src: "/images/button3.svg",
+            alt: "Next",
+            width: "1.87rem",
+            onClick: onNext ? onNext : () => console.log("Next clicked"),
+          },
+        ]}
+      />
     </Overlay>
   );
 };

@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import styled from "styled-components";
-
+import html2canvas from "html2canvas";
+import { supabase } from "../supabase"; 
+import PlayControlButtons from "./PlayControlButtons";
 
 const Overlay = styled.div`
   position: fixed;
@@ -114,10 +116,10 @@ const NoteSprite = styled.img`
 
 const NoteLabel = styled.div`
   position: absolute;
-  top: 9rem; /* 필요에 따라 값 조절 */
+  top: 9rem;
   transform: translateX(-50%);
   font-size: 0.8rem;
-  color: var( --background-2);
+  color: var(--background-2);
   font-family: "timeline-210", sans-serif;
   font-weight: 400;
 `;
@@ -132,35 +134,23 @@ const Notice = styled.div`
 `;
 
 
-
-const ButtonBg = styled.img`
-  width: 20rem;
-  height: auto;
-  z-index: 0;
-  position: fixed;
-  left: 50%;
-  bottom: 6rem;
-  transform: translateX(-50%);
-`;
-
-const ButtonContainer = styled.div`
+const ScoreDisplay = styled.div`
   display: flex;
-  gap: 3rem;
-  position: fixed;
-  left: 50%;
-  bottom: 6.5rem;
-  transform: translateX(-50%);
-  z-index: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin-top: -5rem;
 `;
 
-const CloseBtn = styled.button`
-  margin-top: 1rem;
-  background: transparent;
-  border: 1px solid var(--green-04);
-  color: #fff;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
+const CaptureArea = styled.div`
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--background-1);
+  padding: 5rem 4rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 `;
 
 const normalizeLabel = (label) => {
@@ -169,7 +159,6 @@ const normalizeLabel = (label) => {
   return s || "rest";
 };
 
-// 오선 위 수직 위치 (5선 간격 조정)
 const PITCH_Y = {
   Do: 5.8,
   Re: 5.0,
@@ -190,6 +179,7 @@ const noteImageFromLabel = (label) => {
 };
 
 const NOTE_TO_EN = { Do: 'Do', Re: 'Re', Mi: 'Mi', Fa: 'Fa', Sol: 'Sol', La: 'La', Ti: 'Ti' };
+
 const placeNotesInMeasure = (measureNotes, measureIndex) => {
   const lefts = [12.5, 37.5, 62.5, 87.5];
   return measureNotes.map((raw, idx) => {
@@ -240,41 +230,178 @@ const Staff = ({ systemNotes, systemIndex }) => {
   );
 };
 
-const Score = ({ notes = [], bpm = 100, onClose, onNext }) => {
+const Score = ({ notes = [], bpm = 100, onClose, onNext, userId }) => {
+  const scoreRef = useRef(null);
+  const [isSaving, setIsSaving] = useState(false);
+  
   const filled = Array.from({ length: 32 }, (_, i) => normalizeLabel(notes[i]));
   const system1 = filled.slice(0, 16);
   const system2 = filled.slice(16, 32);
-  console.log("onNext:", onNext);
+
+
+  const StaffContent = () => (
+    <>
+      <Staff systemNotes={system1} systemIndex={0} />
+      <Staff systemNotes={system2} systemIndex={1} />
+    </>
+  );
+
+
+  const saveScoreImage = async () => {
+    if (!scoreRef.current) {
+      console.error("Score reference is missing");
+      return null;
+    }
+
+    if (!userId) {
+      console.error("User ID is missing - please pass userId prop to Score component");
+      alert("User ID가 없습니다. userId prop을 전달해주세요.");
+      return null;
+    }
+
+    setIsSaving(true);
+    try {
+
+      const { data: recordings, error: fetchError } = await supabase
+        .from("Recording")
+        .select("id")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      if (!recordings || recordings.length === 0) {
+        throw new Error("해당 사용자의 녹음 기록을 찾을 수 없습니다.");
+      }
+
+      const recordingId = recordings[0].id;
+      console.log("Found recording ID:", recordingId);
+
+
+      const canvas = await html2canvas(scoreRef.current, {
+        backgroundColor: '#1a1a1a',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: scoreRef.current.scrollWidth,
+        height: scoreRef.current.scrollHeight,
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0,
+      });
+
+
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/png", 0.95);
+      });
+
+      if (!blob) {
+        throw new Error("Failed to create image blob");
+      }
+
+
+      const fileName = `score_${userId}_${recordingId}_${Date.now()}.png`;
+
+      
+      const { error: uploadError } = await supabase.storage
+        .from("scores")
+        .upload(fileName, blob, {
+          contentType: "image/png",
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("scores")
+        .getPublicUrl(fileName);
+
+  
+      const { error: updateError } = await supabase
+        .from("Recording")
+        .update({ image_url: publicUrl })
+        .eq("id", recordingId);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      console.log("✅ Score image saved successfully:", publicUrl);
+      return publicUrl;
+    } catch (error) {
+      console.error("❌ Error saving score image:", error);
+      alert(`악보 저장 중 오류가 발생했습니다: ${error.message}`);
+      return null;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleNext = async () => {
+    const publicUrl = await saveScoreImage(); 
+    if (!publicUrl) return;
+  
+
+    await fetch("http://localhost:3001/print-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageUrl: publicUrl })
+    });
+  
+    if (onNext) {
+      onNext();
+    }
+  };
 
   return (
     <Overlay>
       <Label>( Recording )</Label>
-      <Staff systemNotes={system1} systemIndex={0} />
-      <Staff systemNotes={system2} systemIndex={1} />
-      <Notice>Click  <img src="./images/button1.svg" style={{marginBottom: "-0.3rem", padding: "0 0.5rem"}}/>  to re-record</Notice>
       
-      <ButtonBg src="/images/buttonBg.svg" alt="Button bg" />
+      {/* 화면에 보이는 악보 */}
+      <ScoreDisplay>
+        <StaffContent />
+      </ScoreDisplay>
       
-      <ButtonContainer>
-        <img
-          src="/images/button1.svg"
-          alt="Prev"
-          onClick={onClose}
-          style={{ cursor: "pointer", width: "1.87rem", height: "auto" }}
-        />
-        <img
-          src="/images/button2.svg"
-          alt="Next"
-          onClick={onNext}
-          style={{ cursor: "pointer", width: "4rem", height: "auto"}}
-        />
-        <img
-          src="/images/button3.svg"
-          alt="Next"
-          onClick={onNext}
-          style={{ cursor: "pointer", width: "1.87rem", height: "auto"}}
-        />
-      </ButtonContainer>
+      {/* 캡처용 악보 (화면 밖에 숨김) */}
+      <CaptureArea ref={scoreRef}>
+        <StaffContent />
+      </CaptureArea>
+      
+      <Notice>
+        Click <img src="./images/button1.svg" alt="Re-record button" style={{marginBottom: "-0.3rem", padding: "0 0.5rem"}}/>  to re-record
+      </Notice>
+      
+      <PlayControlButtons
+        buttons={[
+          {
+            src: "/images/button1.svg",
+            alt: "Prev",
+            width: "1.87rem",
+            onClick: onClose,
+          },
+          {
+            src: "/images/button2.svg",
+            alt: "Next",
+            width: "4rem",
+            onClick: handleNext,
+            disabled: isSaving,
+            disabledOpacity: 0.6,
+            disabledCursor: "wait",
+          },
+          {
+            src: "/images/button3.svg",
+            alt: "Save",
+            width: "1.87rem",
+            onClick: saveScoreImage,
+          },
+        ]}
+      />
     </Overlay>
   );
 };

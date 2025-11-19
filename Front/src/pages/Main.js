@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import Model from "../components/Model";
 
@@ -7,7 +7,7 @@ const BackgroundOverlay = styled.div`
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 15vh; /* shrink 상태 */
+  height: 15vh;
   background-color: var(--background-3);
   z-index: 1;
 `;
@@ -15,31 +15,56 @@ const BackgroundOverlay = styled.div`
 const Container = styled.div`
   position: relative;
   z-index: 2;
-  transform: translateY(36vh); /* move-down 상태 */
+  transform: translateY(36vh);
   transition: none;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    transform: translateY(32vh);
+  }
+
+  @media (min-width: 2560px) {
+    transform: translateY(30vh);
+  }
 `;
 
 const OnboardingLine = styled.div`
   display: flex;
   align-items: center;
-  gap: 80px; /* 최종 상태 간격 */
+  gap: 80px;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    gap: 6vw;
+  }
+
+  @media (min-width: 2560px) {
+    gap: 5vw;
+  }
 `;
 
 const SideImg = styled.img`
   width: 420px;
-  opacity: 1; /* 최종 상태에서는 보임 */
+  opacity: 1;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    width: clamp(350px, 18vw, 500px);
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(400px, 20vw, 600px);
+  }
 `;
 
 const BracketImg = styled.img`
   width: 50px;
   z-index: 20;
-`;
 
-const CenterImg = styled.img`
-  height: auto;
-  object-fit: cover;
-  opacity: 1;
-  margin-top: -5rem;
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    width: clamp(40px, 2.5vw, 60px);
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(50px, 2.5vw, 70px);
+  }
 `;
 
 const CenterImgContainer = styled.div`
@@ -47,6 +72,16 @@ const CenterImgContainer = styled.div`
   width: 200px;
   height: 300px;
   overflow: visible;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    width: clamp(180px, 10vw, 250px);
+    height: clamp(270px, 15vw, 350px);
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(220px, 11vw, 300px);
+    height: clamp(330px, 16.5vw, 400px);
+  }
 `;
 
 const NewImgContainer = styled.div`
@@ -54,23 +89,72 @@ const NewImgContainer = styled.div`
   top: 12%;
   left: 62%;
   transform: translateX(-50%);
-  opacity: 1; /* show 상태 */
+  opacity: 1;
   width: 200px;
   height: 200px;
   z-index: 50;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    width: clamp(180px, 10vw, 250px);
+    height: clamp(180px, 10vw, 250px);
+    left: 60%;
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(220px, 11vw, 300px);
+    height: clamp(220px, 11vw, 300px);
+    left: 58%;
+  }
 `;
 
 const CenterImgNew = styled.img`
+  position: relative;
   z-index: 100;
   width: 150px;
   height: auto;
   display: block;
   opacity: 1;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    width: clamp(130px, 7.5vw, 200px);
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(160px, 8vw, 240px);
+  }
+`;
+
+const PupilImg = styled.img`
+  position: absolute;
+  top: 25%;
+  width: 40px;
+  height: auto;
+  z-index: 101;
+  pointer-events: none;
+  transition: transform 0.1s ease-out;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    width: clamp(35px, 2vw, 50px);
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(45px, 2.2vw, 60px);
+  }
+`;
+
+const LeftPupil = styled(PupilImg)`
+  left: 22%;
+  transform: translate(-50%, -50%);
+`;
+
+const RightPupil = styled(PupilImg)`
+  left: 54%;
+  transform: translate(-50%, -50%);
 `;
 
 const ExtraImg = styled.img`
   position: absolute;
-  opacity: 1; /* show 상태 */
+  opacity: 1;
   transition: none;
 `;
 
@@ -87,7 +171,68 @@ const ImgTwo = styled(ExtraImg)`
   width: 35%;
 `;
 
+
+const SoundToggle = styled.div`
+  position: fixed;
+  bottom: 160px;
+  right: 40px;
+  z-index: 99999;
+  width: 60px;
+  height: 32px;
+  border-radius: 20px;
+  background: var(--background-3);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  cursor: pointer;
+  transition: background 0.25s ease;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    width: clamp(55px, 3vw, 70px);
+    height: clamp(30px, 1.7vw, 38px);
+    bottom: clamp(140px, 8vh, 180px);
+    right: clamp(35px, 2vw, 50px);
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(65px, 3.2vw, 80px);
+    height: clamp(35px, 1.8vw, 42px);
+    bottom: clamp(150px, 8.5vh, 200px);
+    right: clamp(40px, 2.2vw, 60px);
+  }
+`;
+
+const ToggleHandle = styled.div`
+  width: 24px;
+  height: 24px;
+  background: var(--background-1);
+  border-radius: 50%;
+  transform: ${(props) => (props.$active ? "translateX(28px)" : "translateX(0px)")};
+  transition: transform 0.25s ease;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    width: clamp(22px, 1.2vw, 28px);
+    height: clamp(22px, 1.2vw, 28px);
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(26px, 1.3vw, 32px);
+    height: clamp(26px, 1.3vw, 32px);
+  }
+`;
+
+
+
+
+
 const Main = () => {
+  const [leftPupilPosition, setLeftPupilPosition] = useState({ x: 15, y: 5 });
+  const [rightPupilPosition, setRightPupilPosition] = useState({ x: 15, y: 5 });
+
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // HTML 클래스 추가
   useEffect(() => {
     document.body.classList.add('main-page');
     document.documentElement.classList.add('main-html');
@@ -97,32 +242,168 @@ const Main = () => {
     };
   }, []);
 
+  // 오디오 생성 + 자동 재생 시도 (기존 로직 유지)
+  useEffect(() => {
+    const audio = new Audio("/sounds/background.mp3"); // public/music.mp3 위치
+    audio.loop = true;
+    audio.volume = 0.4;
+    audioRef.current = audio;
+
+    const tryPlay = async () => {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+        console.log("BGM autoplay success");
+        return true;
+      } catch (err) {
+        console.log("Autoplay blocked. Waiting for user interaction...");
+        setIsPlaying(false);
+        return false;
+      }
+    };
+
+    tryPlay();
+
+    // pointermove / pointerdown / touchstart로 재생 보정 (한 번만)
+    const handleRealMove = () => {
+      if (audioRef.current) {
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(() => {});
+      }
+      window.removeEventListener("pointermove", handleRealMove);
+      window.removeEventListener("pointerdown", handleRealMove);
+      window.removeEventListener("touchstart", handleRealMove);
+    };
+
+    window.addEventListener("pointermove", handleRealMove, { once: true });
+    window.addEventListener("pointerdown", handleRealMove, { once: true });
+    window.addEventListener("touchstart", handleRealMove, { once: true });
+
+    return () => {
+      window.removeEventListener("pointermove", handleRealMove);
+      window.removeEventListener("pointerdown", handleRealMove);
+      window.removeEventListener("touchstart", handleRealMove);
+      audio.pause();
+    };
+  }, []);
+
+  // 사운드 토글 핸들러
+  const toggleSound = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (err) {
+        // play 실패 시 (브라우저 정책) 사용자에게 시도 안내 콘솔
+        console.warn("Play failed:", err);
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  // 키보드 접근성: Space / Enter로 토글
+  const handleKeyDown = (e) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      toggleSound();
+    }
+  };
+
+  // 👀 눈동자 따라다니기 (원래 로직)
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const eyesContainer = document.getElementById('eyes-container');
+      if (!eyesContainer) return;
+
+      const rect = eyesContainer.getBoundingClientRect();
+      const containerWidth = rect.width;
+      const containerHeight = rect.height;
+
+      const leftEyeCenterX = rect.left + containerWidth * 0.42;
+      const leftEyeCenterY = rect.top + containerHeight * 0.25;
+
+      const rightEyeCenterX = rect.left + containerWidth * 0.58;
+      const rightEyeCenterY = rect.top + containerHeight * 0.25;
+
+      const leftDeltaX = e.clientX - leftEyeCenterX;
+      const leftDeltaY = e.clientY - leftEyeCenterY;
+      const leftAngle = Math.atan2(leftDeltaY, leftDeltaX);
+      const leftDistance = Math.min(
+        Math.sqrt(leftDeltaX ** 2 + leftDeltaY ** 2),
+        9
+      );
+      const leftMoveX = Math.cos(leftAngle) * leftDistance * 2;
+      const leftMoveY = Math.sin(leftAngle) * leftDistance;
+
+      const rightDeltaX = e.clientX - rightEyeCenterX;
+      const rightDeltaY = e.clientY - rightEyeCenterY;
+      const rightAngle = Math.atan2(rightDeltaY, rightDeltaX);
+      const rightDistance = Math.min(
+        Math.sqrt(rightDeltaX ** 2 + rightDeltaY ** 2),
+        9
+      );
+      const rightMoveX = Math.cos(rightAngle) * rightDistance * 2;
+      const rightMoveY = Math.sin(rightAngle) * rightDistance;
+
+      setLeftPupilPosition({ x: leftMoveX, y: leftMoveY });
+      setRightPupilPosition({ x: rightMoveX, y: rightMoveY });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   return (
     <>
       <BackgroundOverlay />
+
+      <SoundToggle onClick={toggleSound} $active={isPlaying}>
+  <ToggleHandle $active={isPlaying} />
+</SoundToggle>
+
+
 
       <Container>
         <OnboardingLine>
           <SideImg src="./images/1.svg" alt="left text" />
           <BracketImg src="./images/2.svg" alt="left bracket" />
 
-          <CenterImgContainer>
-            {/* original은 숨기고 최종 new 이미지만 별도 컨테이너에서 표시 */}
-          </CenterImgContainer>
+          <CenterImgContainer></CenterImgContainer>
 
           <BracketImg src="./images/3.svg" alt="right bracket" />
           <SideImg src="./images/4.svg" alt="right text" />
         </OnboardingLine>
 
-        <NewImgContainer>
-          <CenterImgNew src="./images/eyes.svg" alt="new" />
+        <NewImgContainer id="eyes-container">
+          <CenterImgNew src="./images/eyes2.svg" alt="new" />
+
+          <LeftPupil
+            src="./images/eyes3.svg"
+            alt="left pupil"
+            style={{
+              transform: `translate(calc(-50% + ${leftPupilPosition.x}px), calc(-50% + ${leftPupilPosition.y}px))`,
+            }}
+          />
+          <RightPupil
+            src="./images/eyes3.svg"
+            alt="right pupil"
+            style={{
+              transform: `translate(calc(-50% + ${rightPupilPosition.x}px), calc(-50% + ${rightPupilPosition.y}px))`,
+            }}
+          />
         </NewImgContainer>
 
         <ImgOne src="./images/a.svg" alt="extra1" />
         <ImgTwo src="./images/5.svg" alt="extra2" />
       </Container>
 
-      {/* 메인 상호작용 모델 */}
       <Model />
     </>
   );
