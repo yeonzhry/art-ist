@@ -14,10 +14,6 @@ const ModalOverlay = styled.div`
   align-items: center;
   justify-content: center;
   padding: 2rem;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
 `;
 
 const ModalContent = styled.div`
@@ -31,13 +27,14 @@ const ModalContent = styled.div`
   overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 
-  /* 태블릿 */
-  @media (max-width: 1024px) {
-    padding: 4rem 3rem;
-    height: 80vh;
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    height: 50vh;
   }
 
-  /* 모바일 */
+  @media (min-width: 2560px) {
+    height: 50vh;
+  }
+
   @media (max-width: 768px) {
     padding: 3.5rem 1.2rem 2rem 1.2rem;
     height: 40vh;
@@ -87,7 +84,7 @@ const TitleSvg = styled.img`
   height: 3rem;
 
   @media (max-width: 768px) {
-    height: 1.8rem;
+    height: 1.0rem;
   }
 `;
 
@@ -98,16 +95,38 @@ const NameNotesContainer = styled.div`
 
   @media (max-width: 768px) {
     gap: 0;
-    transform: scale(0.8);
   }
 `;
 
 const NoteImage = styled.img`
-  height: 2rem;
+  transition: height 0.3s ease;
+
+
+  &.note-small {
+    height: 2.8rem;
+  }
+
+  &.note-large {
+    height: 3.5rem;
+  }
 
   @media (max-width: 768px) {
-    height: 1.5rem !important;
+    &.note-small {
+      height: 0.8rem !important;
+    }
+    &.note-large {
+      height: 1.0rem !important;
+    }
   }
+
+  /* @media (max-width: 480px) {
+    &.note-small {
+      height: 1.2rem !important;
+    }
+    &.note-large {
+      height: 1.5rem !important;
+    }
+  } */
 `;
 
 const UserIdLabel = styled.span`
@@ -120,7 +139,7 @@ const UserIdLabel = styled.span`
 
   @media (max-width: 768px) {
     margin-top: 1rem;
-    font-size: 0.5rem;
+    font-size: 0.4rem;
   }
 `;
 
@@ -135,7 +154,7 @@ const Timestamp = styled.div`
 
   @media (max-width: 768px) {
     margin-bottom: 1rem;
-    font-size: 0.5rem;
+    font-size: 0.3rem;
   }
 `;
 
@@ -181,8 +200,6 @@ const ButtonBg = styled.img`
   bottom: -4rem;
   transform: translateX(-50%);
 
-
-  /* 모바일 */
   @media (max-width: 768px) {
     width: 10rem;
     bottom: -2.5rem;
@@ -198,7 +215,6 @@ const ButtonContainer = styled.div`
   transform: translateX(-50%);
   z-index: 1;
 
-  /* 데스크탑 기본 크기 */
   .rewind-btn {
     width: 1.87rem;
   }
@@ -209,8 +225,6 @@ const ButtonContainer = styled.div`
     width: 1.87rem;
   }
 
-
-  /* 모바일 */
   @media (max-width: 768px) {
     bottom: -2.2rem;
     gap: 1.5rem;
@@ -225,7 +239,6 @@ const ButtonContainer = styled.div`
   }
 `;
 
-
 const RecordingDetailModal = ({ recording, onClose }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const synthRef = useRef(null);
@@ -233,7 +246,6 @@ const RecordingDetailModal = ({ recording, onClose }) => {
   const currentNoteIndexRef = useRef(0);
   const playbackTimeoutRef = useRef(null);
 
-  // Tone.js 초기화
   const clearPlaybackTimer = () => {
     if (playbackTimeoutRef.current) {
       clearTimeout(playbackTimeoutRef.current);
@@ -279,7 +291,6 @@ const RecordingDetailModal = ({ recording, onClose }) => {
           });
         }
 
-        // Effects 적용 (녹음 시 사용된 효과)
         if (recording?.notes?.effects) {
           const effects = recording.notes.effects;
           const reverb = new Tone.Reverb({ decay: 2, wet: (effects.reverb || 0) / 100 });
@@ -328,20 +339,18 @@ const RecordingDetailModal = ({ recording, onClose }) => {
       }
 
       const notes = recording.notes.sequence;
-      const noteDuration = "4n"; // 4분음표 (1박자)
+      const noteDuration = "4n"; 
       const bpm = recording?.notes?.tempo || 80;
       Tone.Transport.bpm.value = bpm;
       Tone.Transport.stop();
       Tone.Transport.cancel();
 
-      // 기존 시퀀스 정리
       if (playbackSequenceRef.current) {
         playbackSequenceRef.current.dispose();
       }
 
       currentNoteIndexRef.current = 0;
 
-      // 노트 매핑
       const noteMap = {
         Do: "C4",
         Re: "D4",
@@ -352,7 +361,6 @@ const RecordingDetailModal = ({ recording, onClose }) => {
         Ti: "B4"
       };
 
-      // 시퀀스 생성 - rest를 포함한 모든 노트를 처리
       const sequence = new Tone.Sequence((time, note) => {
         if (note && note !== "rest" && note !== "no hand" && noteMap[note]) {
           const toneNote = noteMap[note];
@@ -387,7 +395,6 @@ const RecordingDetailModal = ({ recording, onClose }) => {
 
   const togglePlayPause = async () => {
     if (isPlaying) {
-      // 정지
       Tone.Transport.stop();
       clearPlaybackTimer();
       if (playbackSequenceRef.current) {
@@ -398,7 +405,6 @@ const RecordingDetailModal = ({ recording, onClose }) => {
       setIsPlaying(false);
       currentNoteIndexRef.current = 0;
     } else {
-      // 재생 시작
       setIsPlaying(true);
       await playNotesSequence();
     }
@@ -450,15 +456,13 @@ const RecordingDetailModal = ({ recording, onClose }) => {
       const noteType = ["a", "e", "i", "m", "n", "r", "v"].includes(char)
         ? "small"
         : "large";
-      
-      const noteHeight = noteType === "small" ? "2.8rem" : "3.5rem";
 
       return (
         <NoteImage
           key={`${char}-${index}`}
           src={`./images/${colorFolder}/${char}${suffix}.png`}
           alt={char}
-          style={{ height: noteHeight }}
+          className={`note-${noteType}`}
         />
       );
     });
@@ -495,29 +499,26 @@ const RecordingDetailModal = ({ recording, onClose }) => {
         <AudioControlsWrapper>
           <ButtonBg src="/images/buttonBg.svg" alt="Button bg" />
           <ButtonContainer>
-  <img 
-    className="rewind-btn"
-    src="/images/button1.svg"
-    alt="Rewind"
-    onClick={handleRewind}
-  />
-  <img 
-    className="play-btn"
-    src={isPlaying ? "/images/button5_pause.svg" : "/images/button5.svg"}
-    alt={isPlaying ? "Pause" : "Play"}
-    onClick={togglePlayPause}
-  />
-  <img 
-    className="forward-btn"
-    src="/images/button3.svg"
-    alt="Forward"
-    onClick={handleForward}
-  />
-</ButtonContainer>
-
+            <img 
+              className="rewind-btn"
+              src="/images/button1.svg"
+              alt="Rewind"
+              onClick={handleRewind}
+            />
+            <img 
+              className="play-btn"
+              src={isPlaying ? "/images/button5_pause.svg" : "/images/button5.svg"}
+              alt={isPlaying ? "Pause" : "Play"}
+              onClick={togglePlayPause}
+            />
+            <img 
+              className="forward-btn"
+              src="/images/button3.svg"
+              alt="Forward"
+              onClick={handleForward}
+            />
+          </ButtonContainer>
         </AudioControlsWrapper>
-
-
       </ModalContent>
     </ModalOverlay>
   );

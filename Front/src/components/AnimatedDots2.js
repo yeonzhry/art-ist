@@ -10,7 +10,7 @@ const float = keyframes`
 const AnimatedDots2 = styled.svg`
   width: 16rem;
   height: auto;
-  margin-left: 35rem;
+
 
   path {
     animation: ${float} 3s ease-in-out infinite;

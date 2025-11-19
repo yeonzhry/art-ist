@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { Link } from "react-router-dom";
 
-// 모바일 메뉴 애니메이션
 const slideIn = keyframes`
   0% {
     opacity: 0;
@@ -28,7 +27,7 @@ const HeaderWrapper = styled.header`
   z-index: 1000;
 
   @media (max-width: 768px) {
-    height: 70px; /* 모바일 헤더 높이 */
+    height: 70px; 
   }
 
   @media (min-width: 1920px) and (max-width: 2560px) {
@@ -88,7 +87,7 @@ const NavMenu = styled.nav`
     }
 
     @media (max-width: 768px) {
-      display: none; /* 모바일에서는 숨김 */
+      display: none; 
     }
   }
 
@@ -110,12 +109,12 @@ const NavMenu = styled.nav`
 
   a {
     text-decoration: none;
-    color: #000;
+    color: var(--background-2);
     font-weight: 400;
     transition: color 0.2s ease;
 
     &:hover {
-      color: #666;
+      color: var(--neutral-06);
     }
   }
 `;
@@ -146,7 +145,7 @@ const MobileMenu = styled.div`
   @media (max-width: 768px) {
     display: ${({ open }) => (open ? "flex" : "none")};
     position: absolute;
-    top: 80px; /* 헤더 높이와 맞추기 */
+    top: 80px;
     right: 12px; 
     flex-direction: column;
     gap: 10px;
@@ -157,7 +156,7 @@ const MobileMenu = styled.div`
       font-size: 0.9rem;
       font-weight: 400;
       padding: 10px 16px;
-      color: #000;
+      color: var(--background-2);
       text-decoration: none;
       text-align: center;
       background: var(--background-1);

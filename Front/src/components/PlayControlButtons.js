@@ -11,13 +11,13 @@ const ButtonBg = styled.img`
   transform: translateX(-50%);
 
   @media (min-width: 1920px) and (max-width: 2560px) {
-    width: clamp(22rem, 12vw, 26rem);
-    bottom: clamp(9rem, 8vh, 11rem);
+    width: clamp(24rem, 13vw, 28rem);
+    bottom: clamp(17.5rem, 9vh, 20rem);
   }
 
   @media (min-width: 2560px) {
     width: clamp(24rem, 13vw, 28rem);
-    bottom: clamp(10rem, 9vh, 12rem);
+    bottom: clamp(17.5rem, 9vh, 20rem);
   }
 
   @media (max-width: 1400px) {
@@ -36,17 +36,12 @@ const ButtonContainer = styled.div`
 
   @media (min-width: 1920px) and (max-width: 2560px) {
     gap: clamp(3.5rem, 3.5vw, 4rem);
-    bottom: clamp(9.5rem, 8.5vh, 11.5rem);
+    bottom: clamp(18rem, 8.5vh, 20rem);
   }
 
   @media (min-width: 2560px) {
-    gap: clamp(4rem, 4vw, 4.5rem);
-    bottom: clamp(10.5rem, 9.5vh, 12.5rem);
-  }
-
-  @media (max-width: 1400px) {
-    bottom: 7.5rem;
-    gap: 2.5rem;
+    gap: clamp(3.5rem, 3.5vw, 4rem);
+    bottom: clamp(18rem, 8.5vh, 20rem);
   }
 `;
 
@@ -77,13 +72,7 @@ const ControlButton = styled.img`
     }};
   }
 
-  &:hover:not([disabled]) {
-    transform: scale(1.05);
-  }
 
-  &:active:not([disabled]) {
-    transform: scale(0.95);
-  }
 `;
 
 const PlayControlButtons = ({
@@ -93,12 +82,11 @@ const PlayControlButtons = ({
 }) => {
   const clickSound = useRef(null);
 
-  // 컴포넌트가 마운트될 때 오디오 준비
+
   useEffect(() => {
-    clickSound.current = new Audio("/sounds/click3.mp3"); // 원하는 사운드
+    clickSound.current = new Audio("/sounds/click3.mp3"); 
     clickSound.current.volume = 0.5;
 
-    // 브라우저에서 interaction 없으면 play 실패 방지
     const unlock = () => {
       clickSound.current.play().then(() => {
         clickSound.current.pause();

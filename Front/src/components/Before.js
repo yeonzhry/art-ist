@@ -1,11 +1,7 @@
 import React from "react";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 import PlayControlButtons from "./PlayControlButtons";
 
-const fadeIn = keyframes`
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-`;
 
 const Overlay = styled.div`
   position: fixed;
@@ -18,7 +14,6 @@ const Overlay = styled.div`
   flex-direction: column;
   align-items: center;
   padding-top: 2rem;
-  /* animation: ${fadeIn} 1s ease forwards; */
   z-index: 9999;
 `;
 
@@ -29,6 +24,16 @@ const Label = styled.div`
   color: var(--background-2);
   position: absolute;
   top: 4.44rem;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      font-size: 3.6rem;
+      top: 12rem;
+  }
+
+  @media (min-width: 2560px) {
+    font-size: 3.6rem;
+      top: 12rem;
+  }
 `;
 
 const TextBox = styled.div`
@@ -40,6 +45,14 @@ const TextBox = styled.div`
   position: relative;
   top: 8rem;
   text-align: center;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      margin-top: 14rem;
+  }
+
+  @media (min-width: 2560px) {
+    margin-top: 14rem;
+  }
 `;
 
 const Line = styled.img`

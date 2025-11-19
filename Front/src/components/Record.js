@@ -26,12 +26,22 @@ const Label = styled.div`
   color: var(--background-2);
   position: absolute;
   top: 4.44rem;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      font-size: 3.6rem;
+      top: 12rem;
+  }
+
+  @media (min-width: 2560px) {
+    font-size: 3.6rem;
+      top: 12rem;
+  }
 `;
 
 const HandsContainer = styled.div`
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-45%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,10 +50,34 @@ const HandsContainer = styled.div`
 
 const LeftHand = styled(HandsContainer)`
   left: 13rem;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      left: 38rem;
+      top: 40rem;
+
+  }
+
+  @media (min-width: 2560px) {
+      left: 38rem;
+      top: 40rem;
+
+    
+  }
 `;
 
 const RightHand = styled(HandsContainer)`
   right: 13rem;
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      right: 38rem;
+      top: 40rem;
+  }
+
+  @media (min-width: 2560px) {
+      right: 38rem;
+      top: 40rem;
+
+    
+  }
 `;
 
 const HandItem = styled.div`
@@ -55,6 +89,23 @@ const HandItem = styled.div`
   img {
     width: 9rem;
     height: auto;
+  }
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      gap: 0rem;
+      img {
+        width: 12rem;
+        height: auto;
+      }
+  }
+
+  @media (min-width: 2560px) {
+    gap: 0rem;
+      img {
+        width: 12rem;
+        height: auto;
+      }
+    
   }
 `;
 
@@ -75,6 +126,22 @@ const WebcamContainer = styled.div`
     width: 100%;
     height: 100%;
   }
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    left: 50%;
+    transform: translate(-50%, -55%);
+    width: 50rem;
+    height: 33.75rem;
+
+
+  }
+
+  @media (min-width: 2560px) {
+    left: 50%;
+    transform: translate(-50%, -55%);
+    width: 50rem;
+    height: 33.75rem;
+  }
 `;
 
 const EffectControlContainer = styled.div`
@@ -83,14 +150,40 @@ const EffectControlContainer = styled.div`
   position: fixed;
   bottom: 6.5rem;
   z-index: 1;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    bottom: 18rem;
+
+  }
+
+  @media (min-width: 2560px) {
+    bottom: 18rem;
+    
+  }
 `;
 
 const LeftEffects = styled(EffectControlContainer)`
   left: 26.5rem;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    left: 58rem;
+  }
+
+  @media (min-width: 2560px) {
+    left: 58rem;
+  }
 `;
 
 const RightEffects = styled(EffectControlContainer)`
   right: 26.5rem;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    right: 58rem;
+  }
+
+  @media (min-width: 2560px) {
+    right: 58rem;
+  }
 `;
 
 const EffectKnob = styled.div`
@@ -113,6 +206,52 @@ const EffectKnob = styled.div`
     margin-top: 0.5rem;
     font-family: "Zen Dots", sans-serif;
   }
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    img {
+    width: 3.6rem;
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.1s ease-out;
+    transform: rotate(${(props) => props.$rotation || 0}deg);
+  }
+
+  }
+
+  @media (min-width: 2560px) {
+
+
+    img {
+    width: 3.6rem;
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.1s ease-out;
+    transform: rotate(${(props) => props.$rotation || 0}deg);
+  }
+    
+  }
+`;
+
+const StatusBox = styled.div`
+  position: fixed;
+  bottom: 11.5rem;
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  font-family: timeline-210, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: var(--neutral-04);
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+    bottom: 25rem;
+
+  }
+
+  @media (min-width: 2560px) {
+    bottom: 25rem;
+    
+  }
 `;
 
 const Record = ({ onPrev, onNext, onComplete }) => {
@@ -128,8 +267,8 @@ const Record = ({ onPrev, onNext, onComplete }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedNotes, setRecordedNotes] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasSaved, setHasSaved] = useState(false); // 저장 완료 플래그
-  const [savedRecordingId, setSavedRecordingId] = useState(null); // 저장된 녹음 ID
+  const [hasSaved, setHasSaved] = useState(false); 
+  const [savedRecordingId, setSavedRecordingId] = useState(null); 
   const recordingTimerRef = useRef(null);
 
   const [reverbIntensity, setReverbIntensity] = useState(0);
@@ -150,7 +289,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
         console.log("User ID loaded:", storedUserId);
       }
       
-      // 이전에 저장된 녹음 ID 확인
+  
       const previousRecordingId = localStorage.getItem('current_recording_id');
       if (previousRecordingId) {
         console.log("이전 녹음 ID 발견:", previousRecordingId);
@@ -160,8 +299,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
       console.error("Failed to fetch user_id:", error);
     }
   }, []);
-  
-  // 컴포넌트 마운트 시 이전 녹음 삭제
+
   useEffect(() => {
     const deletePreviousRecording = async () => {
       const previousRecordingId = localStorage.getItem('current_recording_id');
@@ -169,7 +307,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
         try {
           console.log("이전 녹음 삭제 시도:", previousRecordingId);
           
-          // DB에서 녹음 정보 가져오기 (파일 URL 확인용)
+
           const { data: recordingData, error: fetchError } = await supabase
             .from("Recording")
             .select("file_url, id")
@@ -180,7 +318,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
           if (fetchError) {
             console.log("이전 녹음을 찾을 수 없음 (이미 삭제되었거나 존재하지 않음):", fetchError.message);
           } else if (recordingData) {
-            // 스토리지에서 파일 삭제
+     
             if (recordingData.file_url) {
               try {
                 const fileName = recordingData.file_url.split('/').pop();
@@ -200,7 +338,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
               }
             }
             
-            // DB에서 녹음 삭제
+       
             const { error: deleteError } = await supabase
               .from("Recording")
               .delete()
@@ -214,7 +352,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
             }
           }
           
-          // localStorage에서 이전 녹음 ID 제거
+
           localStorage.removeItem('current_recording_id');
           setSavedRecordingId(null);
         } catch (err) {
@@ -444,7 +582,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
   };
 
   const saveToSupabase = async (notes, audioBlob) => {
-    // 중복 저장 방지
+
     if (isSaving || hasSaved) {
       console.log("Already saving or saved, skipping...");
       return;
@@ -521,19 +659,16 @@ const Record = ({ onPrev, onNext, onComplete }) => {
         const savedId = data[0]?.id;
         
         if (savedId) {
-          // 저장된 녹음 ID를 localStorage에 저장 (재녹음 시 삭제용)
+   
           localStorage.setItem('current_recording_id', savedId.toString());
           setSavedRecordingId(savedId.toString());
         }
         
-        setHasSaved(true); // 저장 완료 표시
-        setIsSaving(false); // 저장 완료
+        setHasSaved(true); 
+        setIsSaving(false); 
         console.log("✅ 녹음 저장 완료. ID:", savedId);
         
-        // 저장이 완료된 후 자동으로 Score로 이동
-        // 사용자가 Next 버튼을 클릭할 수도 있으므로, 여기서 자동으로 이동하지 않고
-        // 사용자가 Next 버튼을 클릭하거나 자동 이동을 원하면 onComplete 호출
-        // 자동 이동을 원하지 않으면 주석 처리
+      
         setTimeout(() => {
           if (onComplete && notes && notes.length > 0) {
             onComplete(notes);
@@ -544,7 +679,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
       console.error("Save error:", err);
       alert("저장 중 오류 발생.");
       setIsSaving(false);
-      setHasSaved(false); // 저장 실패 시 플래그 리셋
+      setHasSaved(false); 
     }
   };
 
@@ -554,14 +689,14 @@ const Record = ({ onPrev, onNext, onComplete }) => {
 
     setRecordedNotes([]);
     setIsRecording(true);
-    setHasSaved(false); // 녹음 시작 시 플래그 초기화
-    setIsSaving(false); // 저장 상태도 초기화
+    setHasSaved(false); 
+    setIsSaving(false); 
     
     const intervalMs = 1200;
 
     await startAudioRecording();
 
-    // 녹음된 노트를 직접 추적하기 위한 배열
+
     const notesArray = [];
     
     let ticks = 0;
@@ -579,26 +714,26 @@ const Record = ({ onPrev, onNext, onComplete }) => {
       ticks += 1;
       
       if (ticks >= 32) {
-        // 32틱일 때만 finalNotes 생성
+
         if (ticks === 32) {
-          // 32개의 노트가 확실히 기록되었는지 확인
+   
           const finalNotes = notesArray.length === 32 
             ? [...notesArray] 
             : [...notesArray, ...Array(32 - notesArray.length).fill("rest")].slice(0, 32);
           
-          // 상태 업데이트
+
           setRecordedNotes(finalNotes);
         }
         
-        // 34틱까지 기다렸다가 녹음 중단 (마지막 음 재생 시간 확보)
-        if (ticks >= 33) {
+
+        if (ticks > 33) {
           clearInterval(recordingTimerRef.current);
           recordingTimerRef.current = null;
           setIsRecording(false);
           
           const audioBlob = await stopAudioRecording();
           
-          // 32개만 저장 (혹시 모를 추가 노트 제거)
+
           const finalNotes = notesArray.slice(0, 32);
           const paddedNotes = finalNotes.length === 32 
             ? finalNotes 
@@ -608,7 +743,7 @@ const Record = ({ onPrev, onNext, onComplete }) => {
             saveToSupabase(paddedNotes, audioBlob);
           }, 300);
         }
-        return; // 32 이후에는 더 이상 노트 추가하지 않음
+        return; 
       }
     
     }, intervalMs);
@@ -664,23 +799,16 @@ const Record = ({ onPrev, onNext, onComplete }) => {
         </div>
       </WebcamContainer>
 
-      <div
-        style={{
-          position: "fixed",
-          bottom: "11.5rem",
-          display: "flex",
-          gap: "0.8rem",
-          alignItems: "center",
-          fontFamily: "timeline-210, sans-serif",
-          fontWeight: "400",
-          fontStyle: "normal",
-          color: "var(--neutral-04)"
-        }}
-      >
+      <StatusBox>
         <span>
-          {isSaving ? "저장 중..." : isRecording ? `녹음중... ${recordedNotes.length}/32` : "대기 중"}
+          {isSaving
+            ? "저장 중..."
+            : isRecording
+            ? `녹음중... ${recordedNotes.length}/32`
+            : "대기 중"}
         </span>
-      </div>
+      </StatusBox>
+
 
       <LeftEffects>
         <EffectKnob

@@ -19,11 +19,11 @@ const Container = styled.div`
   transition: none;
 
   @media (min-width: 1920px) and (max-width: 2560px) {
-    transform: translateY(32vh);
+    transform: translateY(36vh);
   }
 
   @media (min-width: 2560px) {
-    transform: translateY(30vh);
+    transform: translateY(36vh);
   }
 `;
 
@@ -32,13 +32,8 @@ const OnboardingLine = styled.div`
   align-items: center;
   gap: 80px;
 
-  @media (min-width: 1920px) and (max-width: 2560px) {
-    gap: 6vw;
-  }
-
-  @media (min-width: 2560px) {
-    gap: 5vw;
-  }
+ 
+  
 `;
 
 const SideImg = styled.img`
@@ -288,7 +283,7 @@ const Main = () => {
     };
   }, []);
 
-  // 사운드 토글 핸들러
+
   const toggleSound = async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -301,22 +296,15 @@ const Main = () => {
         await audio.play();
         setIsPlaying(true);
       } catch (err) {
-        // play 실패 시 (브라우저 정책) 사용자에게 시도 안내 콘솔
+
         console.warn("Play failed:", err);
         setIsPlaying(false);
       }
     }
   };
 
-  // 키보드 접근성: Space / Enter로 토글
-  const handleKeyDown = (e) => {
-    if (e.key === " " || e.key === "Enter") {
-      e.preventDefault();
-      toggleSound();
-    }
-  };
 
-  // 👀 눈동자 따라다니기 (원래 로직)
+
   useEffect(() => {
     const handleMouseMove = (e) => {
       const eyesContainer = document.getElementById('eyes-container');

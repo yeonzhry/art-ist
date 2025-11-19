@@ -1,15 +1,11 @@
-// Name.js
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom"; 
 import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import * as Tone from "tone";
-import { supabase } from "../supabase"; // ✅ Supabase 연동
+import { supabase } from "../supabase";
 import PlayControlButtons from "./PlayControlButtons";
 
-// ========================
-// Styled Components
-// ========================
 const fadeIn = keyframes`
   0% { transform: translateY(100%); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
@@ -45,6 +41,16 @@ const Label = styled.div`
   color: var(--background-2);
   position: absolute;
   top: 4.44rem;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      font-size: 3.6rem;
+      top: 12rem;
+  }
+
+  @media (min-width: 2560px) {
+    font-size: 3.6rem;
+      top: 12rem;
+  }
 `;
 
 const TextBox = styled.div`
@@ -57,6 +63,14 @@ const TextBox = styled.div`
   position: relative;
   margin-top: 13.13rem;
   cursor: text;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      margin-top: 27rem;
+  }
+
+  @media (min-width: 2560px) {
+    margin-top: 27rem;
+  }
 `;
 
 const Staff = styled.div`
@@ -85,6 +99,7 @@ const NotesContainer = styled.div`
   justify-content: center;
   position: relative;
   z-index: 1;
+  
 `;
 
 const Note = styled.img`
@@ -150,9 +165,6 @@ const StatusMessage = styled.div`
   font-size: 1rem;
 `;
 
-// ========================
-// Name Component
-// ========================
 const Name = ({ onNext }) => {
   const [name, setName] = useState("");
   const [randomPositions, setRandomPositions] = useState([]);
@@ -222,21 +234,14 @@ const Name = ({ onNext }) => {
 
   const handlePrev = () => navigate("/main");
 
-  // ========================
-  // Supabase Insert
-  // ========================
+ 
   const handleNext = async () => {
     if (!name) return;
 
-    // 🎸 Main.js에서 선택된 instrument 불러오기
+   
     const instrument = localStorage.getItem("instrument");
-    if (!instrument) {
-      setStatus("악기 정보가 없습니다. 메인 화면에서 다시 선택해주세요.");
-      return;
-    }
 
     try {
-      // ✅ Supabase에 name + instrument + color + positions 함께 저장
       const { data, error } = await supabase
         .from("User")
         .insert([{ 
@@ -256,7 +261,6 @@ const Name = ({ onNext }) => {
       const user = data[0];
       setStatus(`생성 완료! ID: ${user.id}, Name: ${user.name}, Instrument: ${user.instrument}`);
 
-      // ✅ user_id를 localStorage에 저장
       localStorage.setItem("user_id", user.id);
 
       if (onNext) onNext();
@@ -266,9 +270,6 @@ const Name = ({ onNext }) => {
     }
   };
 
-  // ========================
-  // Render
-  // ========================
   const nameContent = (
     <Overlay>
       <Label>( Your Name )</Label>

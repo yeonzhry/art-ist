@@ -27,6 +27,16 @@ const Label = styled.div`
   color: var(--background-2);
   position: absolute;
   top: 4.44rem;
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      font-size: 3.6rem;
+      top: 12rem;
+  }
+
+  @media (min-width: 2560px) {
+    font-size: 3.6rem;
+      top: 12rem;
+  }
 `;
 
 const System = styled.div`
@@ -35,7 +45,7 @@ const System = styled.div`
   height: 12rem;
   left: 2rem;
   margin-top: -3rem;
-  top: -8%;
+  top: -20%;
 `;
 
 const StaffLine = styled.div`
@@ -131,6 +141,14 @@ const Notice = styled.div`
   font-family: "timeline-210", sans-serif;
   font-weight: 400;
   color: var(--neutral-03);
+
+  @media (min-width: 1920px) and (max-width: 2560px) {
+      top: 55rem;
+  }
+
+  @media (min-width: 2560px) {
+      top: 55rem;
+  }
 `;
 
 
@@ -396,9 +414,11 @@ const Score = ({ notes = [], bpm = 100, onClose, onNext, userId }) => {
           },
           {
             src: "/images/button3.svg",
-            alt: "Save",
+            alt: "Next",
+            onClick: handleNext,
+            disabled: isSaving,
             width: "1.87rem",
-            onClick: saveScoreImage,
+            // onClick: saveScoreImage,
           },
         ]}
       />

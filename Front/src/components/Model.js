@@ -26,8 +26,7 @@ const Model = ({
       const upSpeedFactor = floatConfig.upSpeedFactor ?? 2.0;
       const downSpeedFactor = floatConfig.downSpeedFactor ?? 1.0;
       const baseSpeed = floatConfig.speed;
-      
-      const currentY = modelRef.current.position.y;
+    
       
    
       const t = timeRef.current * baseSpeed;
@@ -70,9 +69,9 @@ const InstrumentModel = () => {
 
   const clickSoundRef = useRef(null);
 
-  // 오디오 미리 로드
+
   if (!clickSoundRef.current) {
-    clickSoundRef.current = new Audio("/sounds/next.mp3"); // 원하는 효과음 파일 경로
+    clickSoundRef.current = new Audio("/sounds/next.mp3");
     clickSoundRef.current.volume = 0.6;
   }
 
@@ -81,14 +80,14 @@ const InstrumentModel = () => {
     const audio = clickSoundRef.current;
     if (!audio) return;
   
-    audio.currentTime = 0;   // 처음부터
+    audio.currentTime = 0;  
     audio.play();
   
-    // 0.2초 뒤 자동 정지
+
     setTimeout(() => {
       audio.pause();
       audio.currentTime = 0;
-    }, 500); // 200ms = 0.2초
+    }, 500);
     
     setSelectedModel(prev => prev === "piano" ? "guitar" : "piano");
   };
@@ -97,14 +96,14 @@ const InstrumentModel = () => {
     const audio = clickSoundRef.current;
     if (!audio) return;
   
-    audio.currentTime = 0;   // 처음부터
+    audio.currentTime = 0; 
     audio.play();
   
-    // 0.2초 뒤 자동 정지
+
     setTimeout(() => {
       audio.pause();
       audio.currentTime = 0;
-    }, 500); // 200ms = 0.2초
+    }, 500); 
     
     setSelectedModel(prev => prev === "piano" ? "guitar" : "piano");
   };
@@ -232,8 +231,6 @@ const InstrumentModel = () => {
           onClick={() => setSelectedModel("guitar")}
         />
         </div>
-      
-      {/* 모델 클릭 시 /play 라우트로 이동하므로 오버레이 렌더링하지 않음 */}
     </div>
   );
 };

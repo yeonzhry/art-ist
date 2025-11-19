@@ -21,7 +21,7 @@ const HowToContainer = styled.div`
     margin: 0 auto;
     padding-top: 80px;
     font-family: "timeline-210", sans-serif;
-    color: #121212;
+    color: var(--background-2);
     margin-bottom: 10rem;
     scroll-behavior: smooth;
 
@@ -136,7 +136,7 @@ const NumberCircle = styled.span`
     justify-content: center;
     align-items: center;
     margin-bottom: 10px;
-    color: #f8f8f8;
+    color: var(background-2);
 
     ${StepNumber} & { 
     }
@@ -288,9 +288,8 @@ const HowToPlay = () => {
                             </div>
                         </DetailItem>
                     </StepDetails>
-                    <Illustration style={{marginTop: "3rem", marginLeft: "10rem", width: "10rem"}}>
-                    <img src='./images/model.png'/>
-                    </Illustration>
+                    <Illustration src='./images/model.png' style={{marginTop: "3rem", marginLeft: "10rem", width: "10rem"}} alt="model"/>
+        
                 </StepSection>
 
                 <SectionDivider />
@@ -318,18 +317,15 @@ const HowToPlay = () => {
                             </div>
                         </DetailItem>
                     </StepDetails>
-                    <Illustration style={{marginTop: "3rem"}}> 
-                        <img src='./images/button.svg'/>
-                    </Illustration>
+                    <Illustration src='./images/button.svg' style={{marginTop: "3rem"}} alt="button"/> 
                 </StepSection>
 
                 <SectionDivider />
 
             
                 <StepSection className="triptych">
-                    <LeftIllustration>
-                        <img src='./images/hands.svg'/>
-                    </LeftIllustration>
+                    <LeftIllustration src='./images/hands.svg' alt="hands"/>
+                    
                     <TriptychDetails>
                         <DetailItem>
                             <Bullet>•</Bullet>
@@ -364,9 +360,7 @@ const HowToPlay = () => {
 
          
                 <StepSection className="triptych">
-                    <LeftIllustration>
-                        <img src='./images/lp.svg'/>
-                    </LeftIllustration>
+                    <LeftIllustration src='./images/lp.svg' alt="lp"/>
                     <TriptychDetails>
                         <DetailItem>
                             <Bullet>•</Bullet>

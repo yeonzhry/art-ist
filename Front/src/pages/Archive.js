@@ -4,7 +4,6 @@ import { supabase } from "../supabase";
 import RecordingDetailModal from "../components/RecordingDetailModal";
 import Loading from "../components/Loading";
 
-// -------------------- STYLES -----------------------
 
 const Overlay = styled.div`
   position: fixed;
@@ -66,13 +65,13 @@ const LPGrid = styled.div`
     gap: 3rem;
   }
 
-  /* ⭐ 여기 수정됨: 모바일에서 LP 2개씩 */
+
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
   }
 
-  /* ⭐ 초소형 화면(예: 400px 이하)에서는 다시 1열 */
+  
   @media (max-width: 420px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -82,7 +81,7 @@ const LPGrid = styled.div`
 const LPWrapper = styled.div`
   position: relative;
   width: 100%;
-  max-width: 22rem;  /* 기본 최대 크기 */
+  max-width: 22rem;
   cursor: pointer;
   transition: transform 0.3s ease;
   aspect-ratio: 1;
@@ -91,29 +90,23 @@ const LPWrapper = styled.div`
   &:hover {
     transform: translateY(-10px);
   }
-
-  /* 큰 화면 (3~4개 컬럼) */
   @media (min-width: 1920px) {
     max-width: 26rem;
   }
-
-  /* 1400px ~ 768px (2컬럼) */
   @media (max-width: 1400px) {
     max-width: 20rem;
   }
 
-  /* 모바일 – 2컬럼일 때 사이즈 자동 늘림 */
+
   @media (max-width: 768px) {
     max-width: 18rem;
   }
 
-  /* 초소형 – 1컬럼 → 100% 꽉 차게 */
+  
   @media (max-width: 420px) {
     max-width: 90%;
   }
 `;
-
-
 
 
 const LPImageContainer = styled.div`
@@ -215,18 +208,16 @@ const NoteImage = styled.img`
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 `;
 
-// -------------------- COMPONENT -----------------------
-
 const Archive = ({ onLPClick }) => {
   const [recordings, setRecordings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecording, setSelectedRecording] = useState(null);
 
-  // ---------------- SOUND ----------------
+
   const hoverSound = useRef(null);
   const clickSound = useRef(null);
 
-  // 오디오 언락
+
   useEffect(() => {
     hoverSound.current = new Audio("/sounds/hover4.mp3");
     clickSound.current = new Audio("/sounds/click2.mp3");
@@ -247,7 +238,7 @@ const Archive = ({ onLPClick }) => {
     window.addEventListener("click", unlock, { once: true });
   }, []);
 
-  // ---------------- DATA FETCH ----------------
+
   useEffect(() => {
     fetchRecordings();
   }, []);
@@ -300,9 +291,7 @@ const Archive = ({ onLPClick }) => {
 
   const chars = userName.toLowerCase().split("").slice(0, 10);
 
-  // ======================
-  // 📌 1) 모바일/데스크탑 반응형 스케일 값 자동 계산
-  // ======================
+
   const isMobile = window.innerWidth <= 768;
   const scale = isMobile ? 0.72 : 1; 
   const spacingRem = 2.0 * scale;
@@ -310,27 +299,17 @@ const Archive = ({ onLPClick }) => {
   const totalWidthRem = (chars.length - 1) * spacingRem;
 
   return chars.map((char, index) => {
-
-    // ======================
-    // 📌 2) X축 간격 (모바일에서는 좁게)
-    // ======================
     const x = (index * spacingRem) - (totalWidthRem / 2);
 
-    // ======================
-    // 📌 3) Y축 위치 (모바일에서 살짝 중앙으로 당겨주기)
-    // ======================
+
     const baseY = namePositions?.[index] ?? 0;
     const yPercent = baseY * scale + 50;
 
-    // ======================
-    // 📌 4) 글자별 크기 반응형
-    // ======================
+
     const small = ["a", "e", "i", "m", "n", "r", "v"].includes(char);
     const h = (small ? 2.0 : 2.7) * scale + "rem";
 
-    // ======================
-    // 📌 5) 폴더/파일명
-    // ======================
+
     const folder = nameColor === "pink" ? "notes" : "notes_b";
     const suffix = nameColor === "pink" ? "" : "_b";
 
@@ -385,11 +364,11 @@ const Archive = ({ onLPClick }) => {
                   key={rec.id}
                   onMouseEnter={() => {
                     if (!hoverSound.current) return;
-                    hoverSound.current.currentTime = 0; // 시작점으로
-                    hoverSound.current.volume = 0.3;   // 원하면 볼륨도 줄임
+                    hoverSound.current.currentTime = 0; 
+                    hoverSound.current.volume = 0.3;   
                     hoverSound.current.play();
                     setTimeout(() => {
-                      hoverSound.current.pause();       // 150ms 후 강제로 멈춤 → 짧은 소리
+                      hoverSound.current.pause(); 
                       hoverSound.current.currentTime = 0;
                     }, 300);
                   }}

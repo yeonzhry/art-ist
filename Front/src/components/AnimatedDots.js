@@ -11,7 +11,6 @@ const float = keyframes`
 const SvgWrapper = styled.svg`
   width: 16rem;
   height: auto;
-  margin-left: 50rem;
 
   path {
     animation: ${float} 3s ease-in-out infinite;

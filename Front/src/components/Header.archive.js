@@ -1,4 +1,3 @@
-// Archive 전용 간소화된 Header
 import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
