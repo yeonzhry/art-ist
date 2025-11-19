@@ -53,13 +53,13 @@ const LeftHand = styled(HandsContainer)`
 
   @media (min-width: 1920px) and (max-width: 2560px) {
       left: 38rem;
-      top: 40rem;
+      top: 38rem;
 
   }
 
   @media (min-width: 2560px) {
       left: 38rem;
-      top: 40rem;
+      top: 38rem;
 
     
   }
@@ -69,12 +69,12 @@ const RightHand = styled(HandsContainer)`
   right: 13rem;
   @media (min-width: 1920px) and (max-width: 2560px) {
       right: 38rem;
-      top: 40rem;
+      top: 38rem;
   }
 
   @media (min-width: 2560px) {
       right: 38rem;
-      top: 40rem;
+      top: 38rem;
 
     
   }
@@ -152,12 +152,12 @@ const EffectControlContainer = styled.div`
   z-index: 1;
 
   @media (min-width: 1920px) and (max-width: 2560px) {
-    bottom: 18rem;
+    bottom: 15rem;
 
   }
 
   @media (min-width: 2560px) {
-    bottom: 18rem;
+    bottom: 15rem;
     
   }
 `;
@@ -166,11 +166,11 @@ const LeftEffects = styled(EffectControlContainer)`
   left: 26.5rem;
 
   @media (min-width: 1920px) and (max-width: 2560px) {
-    left: 58rem;
+    left: 56rem;
   }
 
   @media (min-width: 2560px) {
-    left: 58rem;
+    left: 56em;
   }
 `;
 
@@ -178,11 +178,11 @@ const RightEffects = styled(EffectControlContainer)`
   right: 26.5rem;
 
   @media (min-width: 1920px) and (max-width: 2560px) {
-    right: 58rem;
+    right: 56rem;
   }
 
   @media (min-width: 2560px) {
-    right: 58rem;
+    right: 56rem;
   }
 `;
 
@@ -244,12 +244,12 @@ const StatusBox = styled.div`
   color: var(--neutral-04);
 
   @media (min-width: 1920px) and (max-width: 2560px) {
-    bottom: 25rem;
+    bottom: 22rem;
 
   }
 
   @media (min-width: 2560px) {
-    bottom: 25rem;
+    bottom: 22rem;
     
   }
 `;

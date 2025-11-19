@@ -47,11 +47,11 @@ const TextBox = styled.div`
   text-align: center;
 
   @media (min-width: 1920px) and (max-width: 2560px) {
-      margin-top: 14rem;
+      margin-top: 11rem;
   }
 
   @media (min-width: 2560px) {
-    margin-top: 14rem;
+    margin-top: 11rem;
   }
 `;
 

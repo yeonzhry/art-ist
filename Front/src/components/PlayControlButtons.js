@@ -12,12 +12,12 @@ const ButtonBg = styled.img`
 
   @media (min-width: 1920px) and (max-width: 2560px) {
     width: clamp(24rem, 13vw, 28rem);
-    bottom: clamp(17.5rem, 9vh, 20rem);
+    bottom: clamp(14.5rem, 9vh, 17rem);
   }
 
   @media (min-width: 2560px) {
     width: clamp(24rem, 13vw, 28rem);
-    bottom: clamp(17.5rem, 9vh, 20rem);
+    bottom: clamp(14.5rem, 9vh, 17rem);
   }
 
   @media (max-width: 1400px) {
@@ -36,12 +36,12 @@ const ButtonContainer = styled.div`
 
   @media (min-width: 1920px) and (max-width: 2560px) {
     gap: clamp(3.5rem, 3.5vw, 4rem);
-    bottom: clamp(18rem, 8.5vh, 20rem);
+    bottom: clamp(15rem, 8.5vh, 17rem);
   }
 
   @media (min-width: 2560px) {
     gap: clamp(3.5rem, 3.5vw, 4rem);
-    bottom: clamp(18rem, 8.5vh, 20rem);
+    bottom: clamp(15rem, 8.5vh, 17rem);
   }
 `;
 
