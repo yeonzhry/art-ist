@@ -136,7 +136,7 @@ const NumberCircle = styled.span`
     justify-content: center;
     align-items: center;
     margin-bottom: 10px;
-    color: var(background-2);
+    color: var(--background-1);
 
     ${StepNumber} & { 
     }
@@ -216,7 +216,7 @@ const Icon = styled.span`
     display: inline-block;
 `;
 
-const Illustration = styled.div`
+const Illustration = styled.img`
 
     min-height: 100px; 
     display: flex;
@@ -252,7 +252,7 @@ const RightCol = styled.div`
 
 const Bullet = styled.span`
     display: inline-block;
-    margin-right: -1rem;
+    margin-right: 0rem;
     font-size: 5rem;
 `;
 
@@ -361,6 +361,7 @@ const HowToPlay = () => {
          
                 <StepSection className="triptych">
                     <LeftIllustration src='./images/lp.svg' alt="lp"/>
+
                     <TriptychDetails>
                         <DetailItem>
                             <Bullet>•</Bullet>

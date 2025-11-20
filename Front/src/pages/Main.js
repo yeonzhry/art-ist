@@ -121,7 +121,7 @@ const CenterImgNew = styled.img`
 
 const PupilImg = styled.img`
   position: absolute;
-  top: 25%;
+  top: 22%;
   width: 40px;
   height: auto;
   z-index: 101;
@@ -133,7 +133,7 @@ const PupilImg = styled.img`
   }
 
   @media (min-width: 2560px) {
-    width: clamp(45px, 2.2vw, 60px);
+    width: clamp(55px, 2.2vw, 60px);
   }
 `;
 
@@ -227,7 +227,6 @@ const Main = () => {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // HTML 클래스 추가
   useEffect(() => {
     document.body.classList.add('main-page');
     document.documentElement.classList.add('main-html');
@@ -237,9 +236,9 @@ const Main = () => {
     };
   }, []);
 
-  // 오디오 생성 + 자동 재생 시도 (기존 로직 유지)
+
   useEffect(() => {
-    const audio = new Audio("/sounds/background.mp3"); // public/music.mp3 위치
+    const audio = new Audio("/sounds/background.mp3"); 
     audio.loop = true;
     audio.volume = 0.4;
     audioRef.current = audio;
@@ -259,7 +258,7 @@ const Main = () => {
 
     tryPlay();
 
-    // pointermove / pointerdown / touchstart로 재생 보정 (한 번만)
+
     const handleRealMove = () => {
       if (audioRef.current) {
         audioRef.current.play().then(() => {
@@ -307,46 +306,50 @@ const Main = () => {
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      const eyesContainer = document.getElementById('eyes-container');
+      const eyesContainer = document.getElementById("eyes-container");
       if (!eyesContainer) return;
-
+  
       const rect = eyesContainer.getBoundingClientRect();
       const containerWidth = rect.width;
       const containerHeight = rect.height;
-
+  
+      const isUltraWide = window.innerWidth >= 2560; 
+      const limit = isUltraWide ? 16 : 9;   // ← 여기서 확대 범위 조절!
+  
       const leftEyeCenterX = rect.left + containerWidth * 0.42;
       const leftEyeCenterY = rect.top + containerHeight * 0.25;
-
+  
       const rightEyeCenterX = rect.left + containerWidth * 0.58;
       const rightEyeCenterY = rect.top + containerHeight * 0.25;
-
+  
       const leftDeltaX = e.clientX - leftEyeCenterX;
       const leftDeltaY = e.clientY - leftEyeCenterY;
       const leftAngle = Math.atan2(leftDeltaY, leftDeltaX);
       const leftDistance = Math.min(
         Math.sqrt(leftDeltaX ** 2 + leftDeltaY ** 2),
-        9
+        limit
       );
       const leftMoveX = Math.cos(leftAngle) * leftDistance * 2;
       const leftMoveY = Math.sin(leftAngle) * leftDistance;
-
+  
       const rightDeltaX = e.clientX - rightEyeCenterX;
       const rightDeltaY = e.clientY - rightEyeCenterY;
       const rightAngle = Math.atan2(rightDeltaY, rightDeltaX);
       const rightDistance = Math.min(
         Math.sqrt(rightDeltaX ** 2 + rightDeltaY ** 2),
-        9
+        limit
       );
       const rightMoveX = Math.cos(rightAngle) * rightDistance * 2;
       const rightMoveY = Math.sin(rightAngle) * rightDistance;
-
+  
       setLeftPupilPosition({ x: leftMoveX, y: leftMoveY });
       setRightPupilPosition({ x: rightMoveX, y: rightMoveY });
     };
-
+  
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+  
 
   return (
     <>
