@@ -1,16 +1,12 @@
-// import logo from './logo.svg';
+// Archive 전용 App
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './styles/font.css';
 import GlobalStyle from "./styles/GlobalStyle"
-import MainPage from "./pages/Onboard";
-import Main from "./pages/Main";
-import Header from "./components/Header";
-import About from "./pages/About";
-import HowTo from "./pages/HowTo";
-import Play from "./pages/Play";
 import Archive from "./pages/Archive";
-
+// 간소화된 Header 사용 (선택적)
+// import Header from "./components/Header.archive";
+import Header from "./components/Header";
 
 function App() {
   return (
@@ -18,11 +14,7 @@ function App() {
       <GlobalStyle />
       <Header />
       <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/main" element={<Main />} />
-        <Route path="/howto" element={<HowTo />} />
-        <Route path="/play" element={<Play />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/" element={<Archive />} />
         <Route path="/archive" element={<Archive />} />
       </Routes>
     </Router>
@@ -30,3 +22,4 @@ function App() {
 }
 
 export default App;
+

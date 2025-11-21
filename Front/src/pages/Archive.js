@@ -21,9 +21,8 @@ const Overlay = styled.div`
   filter: ${(props) => (props.isBlurred ? "blur(5rem)" : "none")};
   transition: filter 0.1s ease;
 
-
   @media (max-width: 768px) {
-    top: 71px
+    top: 71px;
   }
 `;
 
@@ -37,7 +36,6 @@ const Label = styled.h1`
   @media (max-width: 768px) {
     font-size: 2.4rem;
   }
-
 `;
 
 const LPGrid = styled.div`
@@ -65,13 +63,11 @@ const LPGrid = styled.div`
     gap: 3rem;
   }
 
-
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
   }
 
-  
   @media (max-width: 420px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -96,18 +92,13 @@ const LPWrapper = styled.div`
   @media (max-width: 1400px) {
     max-width: 20rem;
   }
-
-
   @media (max-width: 768px) {
     max-width: 18rem;
   }
-
-  
   @media (max-width: 420px) {
     max-width: 90%;
   }
 `;
-
 
 const LPImageContainer = styled.div`
   position: absolute;
@@ -154,7 +145,6 @@ const UserIdLabel = styled.div`
     font-size: 1rem;
     margin-bottom: 0.5rem;
   }
-
 `;
 
 const StaffContainer = styled.div`
@@ -162,8 +152,6 @@ const StaffContainer = styled.div`
   width: 100%;
   height: 3.5rem;
   margin-top: auto;
-
-  
 `;
 
 const Staff = styled.div`
@@ -198,7 +186,6 @@ const Staff = styled.div`
       );
     opacity: 0.4;
   }
-
 `;
 
 const NoteImage = styled.img`
@@ -208,15 +195,19 @@ const NoteImage = styled.img`
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 `;
 
+
 const Archive = ({ onLPClick }) => {
   const [recordings, setRecordings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecording, setSelectedRecording] = useState(null);
 
-
   const hoverSound = useRef(null);
   const clickSound = useRef(null);
 
+  const formatDisplayId = (index, total) => {
+    const num = total - index; 
+    return `( ${String(num).padStart(2, "0")} )`;
+  };
 
   useEffect(() => {
     hoverSound.current = new Audio("/sounds/hover4.mp3");
@@ -231,13 +222,11 @@ const Archive = ({ onLPClick }) => {
         clickSound.current.pause();
         clickSound.current.currentTime = 0;
       });
-
       window.removeEventListener("click", unlock);
     };
 
     window.addEventListener("click", unlock, { once: true });
   }, []);
-
 
   useEffect(() => {
     fetchRecordings();
@@ -246,7 +235,7 @@ const Archive = ({ onLPClick }) => {
   const fetchRecordings = async () => {
     try {
       setLoading(true);
-      
+
       const { data, error } = await supabase
         .from("Recording")
         .select(`
@@ -287,45 +276,41 @@ const Archive = ({ onLPClick }) => {
   };
 
   const renderUserNameOnStaff = (userName, namePositions = null, nameColor = "pink") => {
-  if (!userName) return null;
+    if (!userName) return null;
 
-  const chars = userName.toLowerCase().split("").slice(0, 10);
+    const chars = userName.toLowerCase().split("").slice(0, 10);
 
+    const isMobile = window.innerWidth <= 768;
+    const scale = isMobile ? 0.72 : 1;
+    const spacingRem = 2.0 * scale;
 
-  const isMobile = window.innerWidth <= 768;
-  const scale = isMobile ? 0.72 : 1; 
-  const spacingRem = 2.0 * scale;
+    const totalWidthRem = (chars.length - 1) * spacingRem;
 
-  const totalWidthRem = (chars.length - 1) * spacingRem;
+    return chars.map((char, index) => {
+      const x = index * spacingRem - totalWidthRem / 2;
 
-  return chars.map((char, index) => {
-    const x = (index * spacingRem) - (totalWidthRem / 2);
+      const baseY = namePositions?.[index] ?? 0;
+      const yPercent = baseY * scale + 50;
 
+      const small = ["a", "e", "i", "m", "n", "r", "v"].includes(char);
+      const h = (small ? 2.0 : 2.7) * scale + "rem";
 
-    const baseY = namePositions?.[index] ?? 0;
-    const yPercent = baseY * scale + 50;
+      const folder = nameColor === "pink" ? "notes" : "notes_b";
+      const suffix = nameColor === "pink" ? "" : "_b";
 
-
-    const small = ["a", "e", "i", "m", "n", "r", "v"].includes(char);
-    const h = (small ? 2.0 : 2.7) * scale + "rem";
-
-
-    const folder = nameColor === "pink" ? "notes" : "notes_b";
-    const suffix = nameColor === "pink" ? "" : "_b";
-
-    return (
-      <NoteImage
-        key={index}
-        src={`./images/${folder}/${char}${suffix}.png`}
-        style={{
-          left: `calc(50% + ${x}rem)`,
-          top: `${yPercent}%`,
-          height: h,
-        }}
-      />
-    );
-  });
-};
+      return (
+        <NoteImage
+          key={index}
+          src={`./images/${folder}/${char}${suffix}.png`}
+          style={{
+            left: `calc(50% + ${x}rem)`,
+            top: `${yPercent}%`,
+            height: h,
+          }}
+        />
+      );
+    });
+  };
 
   const getLPImagePath = (color) => {
     const map = {
@@ -335,8 +320,6 @@ const Archive = ({ onLPClick }) => {
     };
     return map[color?.toLowerCase()] || "/images/LP_Blue.svg";
   };
-
-  const formatUserId = (id) => id ? `( ${String(id).padStart(2, "0")} )` : "( -- )";
 
   if (loading) {
     return (
@@ -353,10 +336,13 @@ const Archive = ({ onLPClick }) => {
         <Label>( Archive )</Label>
 
         {recordings.length === 0 ? (
-          <div style={{ color: "var(--neutral-04)" }}>아직 저장된 녹음이 없습니다.</div>
+          <div style={{ color: "var(--neutral-04)" }}>
+            아직 저장된 녹음이 없습니다.
+          </div>
         ) : (
           <LPGrid>
-            {recordings.map((rec) => {
+            {recordings.map((rec, index) => {
+              const total = recordings.length;
               const lp = getLPImagePath(rec.lp_color);
 
               return (
@@ -364,15 +350,14 @@ const Archive = ({ onLPClick }) => {
                   key={rec.id}
                   onMouseEnter={() => {
                     if (!hoverSound.current) return;
-                    hoverSound.current.currentTime = 0; 
-                    hoverSound.current.volume = 0.3;   
+                    hoverSound.current.currentTime = 0;
+                    hoverSound.current.volume = 0.3;
                     hoverSound.current.play();
                     setTimeout(() => {
-                      hoverSound.current.pause(); 
+                      hoverSound.current.pause();
                       hoverSound.current.currentTime = 0;
                     }, 300);
                   }}
-                  
                   onClick={() => handleLPClick(rec)}
                 >
                   <LPImageContainer>
@@ -380,7 +365,8 @@ const Archive = ({ onLPClick }) => {
                   </LPImageContainer>
 
                   <NameCover>
-                    <UserIdLabel>{formatUserId(rec.user_id)}</UserIdLabel>
+
+                  <UserIdLabel>{formatDisplayId(index, total)}</UserIdLabel>
 
                     <StaffContainer>
                       <Staff>
@@ -400,7 +386,10 @@ const Archive = ({ onLPClick }) => {
       </Overlay>
 
       {selectedRecording && (
-        <RecordingDetailModal recording={selectedRecording} onClose={handleCloseModal} />
+        <RecordingDetailModal
+          recording={selectedRecording}
+          onClose={handleCloseModal}
+        />
       )}
     </>
   );
